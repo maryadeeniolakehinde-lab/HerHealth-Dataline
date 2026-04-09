@@ -1,4 +1,5 @@
-import { createClient } from './supabase';
+// Using client for now but this should be used server-side
+import { createClient } from './supabase.client';
 import type { ChatMessage, EmergencyKeywordMatch } from '@/types';
 
 /**

@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { createClient } from './supabase';
+import { createClient } from './supabase.client';
 import type { AnonymousUser } from '@/types';
 
 const HERHEALTH_PREFIX = 'HHD';
