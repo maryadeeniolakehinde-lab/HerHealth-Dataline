@@ -16,19 +16,7 @@ CREATE TABLE public.users (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Chat Messages Table
-CREATE TABLE public.chat_messages (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id TEXT NOT NULL REFERENCES public.users(user_id) ON DELETE CASCADE,
-  consultant_id UUID REFERENCES public.consultants(id) ON DELETE SET NULL,
-  message TEXT NOT NULL,
-  sender message_sender_type NOT NULL,
-  is_emergency BOOLEAN DEFAULT FALSE,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
--- Consultants Table
+-- Consultants Table (Must be created before chat_messages references it)
 CREATE TABLE public.consultants (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email TEXT UNIQUE NOT NULL,
@@ -39,6 +27,18 @@ CREATE TABLE public.consultants (
   max_concurrent_chats INT DEFAULT 5,
   verified BOOLEAN DEFAULT FALSE,
   password_hash TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Chat Messages Table
+CREATE TABLE public.chat_messages (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id TEXT NOT NULL REFERENCES public.users(user_id) ON DELETE CASCADE,
+  consultant_id UUID REFERENCES public.consultants(id) ON DELETE SET NULL,
+  message TEXT NOT NULL,
+  sender message_sender_type NOT NULL,
+  is_emergency BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -66,7 +66,7 @@ CREATE TABLE public.knowledge_articles (
   content TEXT NOT NULL,
   summary TEXT NOT NULL,
   image_url TEXT,
-  age_appropriate user_age_range[] DEFAULT ARRAY['13-15', '16-18', '19-25', '26-30', '30+'],
+  age_appropriate user_age_range[] DEFAULT ARRAY['13-15', '16-18', '19-25', '26-30', '30+']::user_age_range[],
   is_published BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
