@@ -7,3 +7,4 @@ export const metadata: Metadata = {
 
 export default function ConsultantLoginPage() {
   return <ConsultantLogin />;
+}
