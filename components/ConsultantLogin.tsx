@@ -1,13 +1,15 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Heart, Mail, Lock } from 'lucide-react';
 
 interface ConsultantLoginProps {
-  onLoginSuccess: () => void;
+  onLoginSuccess?: () => void;
 }
 
 export const ConsultantLogin: React.FC<ConsultantLoginProps> = ({ onLoginSuccess }) => {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -34,7 +36,12 @@ export const ConsultantLogin: React.FC<ConsultantLoginProps> = ({ onLoginSuccess
       localStorage.setItem('consultant_token', data.token);
       localStorage.setItem('consultant_id', data.consultant_id);
       
-      onLoginSuccess();
+      // Call callback if provided, otherwise redirect
+      if (onLoginSuccess) {
+        onLoginSuccess();
+      } else {
+        router.push('/consultant/dashboard');
+      }
     } catch (err) {
       setError('An error occurred. Please try again.');
     } finally {
