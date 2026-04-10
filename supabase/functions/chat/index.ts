@@ -4,7 +4,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const supabaseUrl = Deno.env.get("SUPABASE_URL");
 const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
 const ollamaUrl = Deno.env.get("OLLAMA_API_URL") || "https://ollama.com/api";
-const ollamaApiKey = Deno.env.get("OLLAMA_API_KEY");
+const ollamaApiKey = Deno.env.get("OLLAMA_API_KEY") || "f2d567f05263413381b56a3b015fb7a1.Arila1QihDtpScMGbh1y79cn";
 const ollamaModel = Deno.env.get("OLLAMA_MODEL") || "gpt-oss:120b-cloud";
 
 interface ChatRequest {
@@ -187,50 +187,19 @@ async function callOllama(prompt: string): Promise<string | null> {
         prompt: prompt,
         temperature: 0.7,
         max_tokens: 1000,
+        stream: false,
       }),
     });
 
     if (!response.ok) {
       console.error(`Ollama Cloud API error: ${response.status} ${response.statusText}`);
+      const errorText = await response.text();
+      console.error(`Ollama error details: ${errorText}`);
       return null;
     }
 
-    // Handle streaming response
-    const reader = response.body?.getReader();
-    if (!reader) {
-      console.error('No response body reader available');
-      return null;
-    }
-
-    let fullResponse = '';
-    const decoder = new TextDecoder();
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      const chunk = decoder.decode(value);
-      const lines = chunk.split('\n').filter(line => line.trim() !== '');
-
-      for (const line of lines) {
-        try {
-          const data = JSON.parse(line);
-          if (data.response) {
-            fullResponse += data.response;
-          }
-          // If we get a done signal, we can stop reading
-          if (data.done) {
-            reader.releaseLock();
-            return fullResponse;
-          }
-        } catch (parseError) {
-          // Ignore parsing errors for individual lines, as they might be incomplete
-          console.warn('Could not parse line:', line);
-        }
-      }
-    }
-
-    return fullResponse || null;
+    const data = await response.json();
+    return data.response || null;
   } catch (error) {
     console.error("Ollama Cloud API error:", error);
     return null;
