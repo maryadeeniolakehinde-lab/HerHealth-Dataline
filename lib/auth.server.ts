@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { createServerSideClient } from './supabase.server';
+import { createServiceRoleClient } from './supabase.server';
 import type { AnonymousUser } from '@/types';
 
 const HERHEALTH_PREFIX = 'HHD';
@@ -30,7 +30,7 @@ export const createAnonymousUser = async (
   ageRange: string,
   state: string
 ): Promise<AnonymousUser | null> => {
-  const supabase = await createServerSideClient();
+  const supabase = createServiceRoleClient();
 
   try {
     const userID = generateUserID();
@@ -70,7 +70,7 @@ export const createAnonymousUser = async (
 export const verifyReturningUser = async (
   userID: string
 ): Promise<AnonymousUser | null> => {
-  const supabase = await createServerSideClient();
+  const supabase = createServiceRoleClient();
 
   try {
     const { data, error } = await supabase
@@ -100,7 +100,7 @@ export const verifyReturningUser = async (
  * Get user profile data
  */
 export const getUserProfile = async (userID: string) => {
-  const supabase = await createServerSideClient();
+  const supabase = createServiceRoleClient();
 
   try {
     const { data, error } = await supabase
