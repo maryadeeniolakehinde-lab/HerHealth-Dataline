@@ -29,18 +29,31 @@ export async function POST(request: NextRequest) {
       .toString('hex');
     const password_hash = `${salt}:${hash}`;
 
-    // Update admin user in database
+    // Create or update admin user in database
     const { data, error } = await supabase
       .from('admin_users')
-      .update({
-        password_hash,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('email', email)
+      .upsert(
+        {
+          email,
+          password_hash,
+          role: 'admin',
+          is_active: true,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'email' }
+      )
       .select();
 
-    if (error || !data || data.length === 0) {
+    if (error) {
       console.error('Database error:', error);
+      return NextResponse.json(
+        { error: 'Failed to set password. Please try again.' },
+        { status: 500 }
+      );
+    }
+
+    if (!data || data.length === 0) {
+      console.error('Admin user not found or upsert failed');
       return NextResponse.json(
         { error: 'Failed to set password. Please try again.' },
         { status: 500 }
