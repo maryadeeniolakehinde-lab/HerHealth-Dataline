@@ -46,6 +46,12 @@ export const AnonymousAuth: React.FC<AnonymousAuthProps> = ({
 
       const data = await response.json();
       setUserId(data.user_id);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(
+          'herhealth_session',
+          JSON.stringify({ user_id: data.user_id, session_hash: '', timestamp: Date.now() })
+        );
+      }
       setStep('created');
     } catch (error) {
       console.error('Error:', error);

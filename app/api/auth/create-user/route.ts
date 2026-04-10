@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createAnonymousUser, verifyReturningUser } from '@/lib/auth';
+import { createAnonymousUser, verifyReturningUser } from '@/lib/auth.server';
 
 export async function POST(request: NextRequest) {
   try {
