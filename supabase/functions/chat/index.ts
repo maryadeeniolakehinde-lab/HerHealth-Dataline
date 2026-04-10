@@ -5,7 +5,7 @@ const supabaseUrl = Deno.env.get("SUPABASE_URL");
 const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
 const ollamaUrl = Deno.env.get("OLLAMA_API_URL") || "https://ollama.com/api";
 const ollamaApiKey = Deno.env.get("OLLAMA_API_KEY");
-const ollamaModel = Deno.env.get("OLLAMA_MODEL") || "meditron:7b-cloud";
+const ollamaModel = Deno.env.get("OLLAMA_MODEL") || "gpt-oss:120b-cloud";
 
 interface ChatRequest {
   user_id: string;
