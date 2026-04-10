@@ -1,4 +1,4 @@
-const OLLAMA_API_URL = process.env.OLLAMA_API_URL || 'https://api.ollama.ai';
+const OLLAMA_API_URL = process.env.OLLAMA_API_URL || 'https://ollama.com/api';
 const OLLAMA_API_KEY = process.env.OLLAMA_API_KEY;
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'meditron:7b';
 
