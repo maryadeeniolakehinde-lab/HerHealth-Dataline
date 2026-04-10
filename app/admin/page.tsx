@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { AdminDashboard } from '@/components/AdminDashboard';
+import { AdminPageClient } from '@/components/AdminPageClient';
 
 export const metadata: Metadata = {
   title: 'Admin Dashboard - HerHealth',
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function AdminPage() {
-  return <AdminDashboard />;
+  return <AdminPageClient />;
 }

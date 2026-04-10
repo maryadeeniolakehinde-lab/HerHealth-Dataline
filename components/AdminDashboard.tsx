@@ -26,6 +26,7 @@ import {
   Trash2,
   Eye,
 } from 'lucide-react';
+import { clearAdminSession } from '@/lib/adminAuth';
 
 interface AnalyticsData {
   topic: string;
@@ -146,7 +147,13 @@ export const AdminDashboard: React.FC = () => {
               Aggregated, anonymized health advocacy insights
             </p>
           </div>
-          <button className="flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-medium transition-colors">
+          <button
+            onClick={() => {
+              clearAdminSession();
+              window.location.href = '/admin';
+            }}
+            className="flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-medium transition-colors"
+          >
             <LogOut className="w-4 h-4" />
             Logout
           </button>
