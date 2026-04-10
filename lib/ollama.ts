@@ -1,6 +1,6 @@
-const OLLAMA_API_URL = process.env.OLLAMA_API_URL || 'https://api.ollama.ai';
+const OLLAMA_API_URL = process.env.OLLAMA_API_URL || 'https://ollama.com/api';
 const OLLAMA_API_KEY = process.env.OLLAMA_API_KEY;
-const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'meditron:7b';
+const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'meditron:7b-cloud';
 
 /**
  * Build medical context-aware prompt
@@ -45,20 +45,21 @@ export const callOllamaAPI = async (prompt: string): Promise<string | null> => {
 
     const request = {
       model: OLLAMA_MODEL,
-      messages: [
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
+      prompt: prompt,
       temperature: 0.7,
       max_tokens: 1000,
     };
 
+    console.log('Making request to Ollama API:', {
+      url: `${OLLAMA_API_URL}/generate`,
+      model: request.model,
+      promptLength: prompt.length
+    });
+
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 60000);
 
-    const response = await fetch(`${OLLAMA_API_URL}/v1/chat/completions`, {
+    const response = await fetch(`${OLLAMA_API_URL}/generate`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${OLLAMA_API_KEY}`,
@@ -70,13 +71,51 @@ export const callOllamaAPI = async (prompt: string): Promise<string | null> => {
 
     clearTimeout(timeoutId);
 
+    console.log('Ollama API response status:', response.status);
+    console.log('Ollama API response headers:', [...response.headers.entries()]);
+
     if (!response.ok) {
-      console.error(`Ollama Cloud API error: ${response.status} ${response.statusText}`);
+      const errorText = await response.text();
+      console.error(`Ollama Cloud API error: ${response.status} ${response.statusText}`, errorText);
       return null;
     }
 
-    const data = await response.json();
-    return data.choices?.[0]?.message?.content || null;
+    // Handle streaming response
+    const reader = response.body?.getReader();
+    if (!reader) {
+      console.error('No response body reader available');
+      return null;
+    }
+
+    let fullResponse = '';
+    const decoder = new TextDecoder();
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value);
+      const lines = chunk.split('\n').filter(line => line.trim() !== '');
+
+      for (const line of lines) {
+        try {
+          const data = JSON.parse(line);
+          if (data.response) {
+            fullResponse += data.response;
+          }
+          // If we get a done signal, we can stop reading
+          if (data.done) {
+            reader.releaseLock();
+            return fullResponse;
+          }
+        } catch (parseError) {
+          // Ignore parsing errors for individual lines, as they might be incomplete
+          console.warn('Could not parse line:', line);
+        }
+      }
+    }
+
+    return fullResponse || null;
   } catch (error) {
     console.error('Error calling Ollama Cloud API:', error);
     return null;
