@@ -3,9 +3,9 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL");
 const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
-const ollamaUrl = Deno.env.get("OLLAMA_API_URL") || "https://ollama.com/api";
-const ollamaApiKey = Deno.env.get("OLLAMA_API_KEY") || "f2d567f05263413381b56a3b015fb7a1.Arila1QihDtpScMGbh1y79cn";
-const ollamaModel = Deno.env.get("OLLAMA_MODEL") || "gpt-oss:120b-cloud";
+const ollamaUrl = Deno.env.get("OLLAMA_API_URL");
+const ollamaApiKey = Deno.env.get("OLLAMA_API_KEY");
+const ollamaModel = Deno.env.get("OLLAMA_MODEL");
 
 interface ChatRequest {
   user_id: string;
@@ -87,33 +87,49 @@ async function getAvailableConsultants(supabase: any) {
 }
 
 /**
- * Build a very compact prompt to ensure success
+ * Compress chat history to reduce token usage
  */
+function compressChatHistory(
+  history: Array<{ role: string; content: string }>,
+  maxTokens: number = 1000,
+  keepRecent: number = 3
+): Array<{ role: string; content: string }> {
+  if (!history || history.length === 0) return [];
+  if (history.length <= keepRecent) return history;
+
+  const recentMessages = history.slice(-keepRecent);
+  return recentMessages;
+}
+
+/**
+ * Build medical-aware prompt for Ollama
+ */
+interface UserDetails {
+  name?: string;
+  medicalHistory?: string;
+}
+
 function buildMedicalPrompt(
   userMessage: string,
   ageRange: string,
   state: string,
-  chatHistory: Array<{ role: string; content: string }> = []
+  chatHistory: Array<{ role: string; content: string }> = [],
+  userDetails: UserDetails = {}
 ): string {
-  // Only keep last 4 messages for context to maintain quality while keeping tokens low
-  const recentHistory = chatHistory.slice(-4);
-  const historyContext = recentHistory.map(h => `${h.role === 'user' ? 'User' : 'HerHealth AI'}: ${h.content}`).join('\n');
+  const compressedHistory = compressChatHistory(chatHistory);
+  const historyContext = compressedHistory
+    .map((chat) => `${chat.role === "user" ? "User" : "Assistant"}: ${chat.content}`)
+    .join("\n");
 
-  return `You are HerHealth AI, a supportive medical assistant for young women in Nigeria.
-User Profile: Age ${ageRange}, Location: ${state}.
+  return `You are HerHealth AI, a supportive medical assistant for young women in Nigeria (Age: ${ageRange}, Location: ${state}). 
+Provide short, empathetic, medically accurate health guidance. 
+Remind users to consult a professional. 
+If emergency, say "Call 112". 
+Do not diagnose. 
 
-Guidelines:
-- Provide empathetic, medically accurate health guidance.
-- Focus on education, self-care, and wellness.
-- If it's an emergency, explicitly tell them to "Call 112 immediately".
-- Never provide definitive diagnoses - always recommend seeing a qualified doctor.
-- Keep responses concise and under 250 words.
-
-Previous Conversation:
-${historyContext || 'No previous messages.'}
-
+${historyContext ? `Previous Conversation:\n${historyContext}\n` : ""}
 User: ${userMessage}
-HerHealth AI:`;
+Assistant:`;
 }
 
 /**
@@ -121,8 +137,11 @@ HerHealth AI:`;
  */
 async function callOllama(prompt: string): Promise<string | null> {
   try {
-    console.log(`Sending prompt to Ollama (length: ${prompt.length})`);
-    
+    if (!ollamaApiKey || !ollamaUrl || !ollamaModel) {
+      console.error("Ollama configuration is missing (API Key, URL, or Model)");
+      return null;
+    }
+
     const response = await fetch(`${ollamaUrl}/generate`, {
       method: "POST",
       headers: {
@@ -132,24 +151,22 @@ async function callOllama(prompt: string): Promise<string | null> {
       body: JSON.stringify({
         model: ollamaModel,
         prompt: prompt,
+        temperature: 0.7,
+        max_tokens: 1000,
         stream: false,
-        options: {
-          num_predict: 300,
-          temperature: 0.7,
-        }
       }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`Ollama Error (${response.status}): ${errorText}`);
+      console.error(`Ollama API error: ${response.status} ${response.statusText} - ${errorText}`);
       return null;
     }
 
     const data = await response.json();
     return data.response || null;
   } catch (error) {
-    console.error("Ollama Network Error:", error);
+    console.error("Ollama Cloud API error:", error);
     return null;
   }
 }
@@ -270,7 +287,8 @@ Your safety is our priority. ❤️`,
     }
 
     // Route to AI
-    const prompt = buildMedicalPrompt(message, age_range, state, chat_history);
+    const userDetails = {};
+    const prompt = buildMedicalPrompt(message, age_range, state, chat_history, userDetails);
     
     console.log(`Calling Ollama with prompt length: ${prompt.length}`);
     const aiResponse = await callOllama(prompt);
@@ -282,14 +300,11 @@ Your safety is our priority. ❤️`,
         is_emergency: false,
         routed_to: "ai",
         message:
-          "I'm sorry, I'm having trouble connecting to my knowledge base right now. This can happen if the AI service is overloaded. Please try again in a few moments, or check if a live consultant is available.",
+          "I'm sorry, I'm having trouble connecting to my knowledge base right now. Please try again in a few moments, or check if a live consultant is available.",
       };
 
       return new Response(JSON.stringify(fallbackResponse), {
-        headers: { 
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
+        headers: { "Content-Type": "application/json" },
       });
     }
 
@@ -308,10 +323,7 @@ Your safety is our priority. ❤️`,
     };
 
     return new Response(JSON.stringify(response), {
-      headers: { 
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-      },
+      headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
     console.error("Handler error:", error);
