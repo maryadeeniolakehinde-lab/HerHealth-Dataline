@@ -8,68 +8,12 @@ interface Article {
   id: string;
   title: string;
   slug: string;
-  category: 'personal-health' | 'reproductive-health' | 'mental-wellbeing' | 'social-challenges';
+  category: string;
   summary: string;
-  ageAppropriate: string[];
-  image: string;
+  age_appropriate: string[];
+  image_url: string;
+  created_at?: string;
 }
-
-const MOCK_ARTICLES: Article[] = [
-  {
-    id: '1',
-    title: 'Understanding Your Menstrual Cycle',
-    slug: 'understanding-menstrual-cycle',
-    category: 'reproductive-health',
-    summary: 'A complete guide to the phases of your cycle and what to expect each month.',
-    ageAppropriate: ['13-15', '16-18', '19-25'],
-    image: 'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&q=80&w=800',
-  },
-  {
-    id: '2',
-    title: 'Nutrition for Growing Bodies',
-    slug: 'nutrition-for-teens',
-    category: 'personal-health',
-    summary: 'Essential nutrients and healthy eating habits for young women in Nigeria.',
-    ageAppropriate: ['13-15', '16-18'],
-    image: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&q=80&w=800',
-  },
-  {
-    id: '3',
-    title: 'Managing Period Pain Naturally',
-    slug: 'managing-period-pain',
-    category: 'reproductive-health',
-    summary: 'Proven tips and home remedies for dealing with menstrual cramps safely.',
-    ageAppropriate: ['16-18', '19-25', '26-30'],
-    image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&q=80&w=800',
-  },
-  {
-    id: '4',
-    title: 'Building Emotional Resilience',
-    slug: 'mental-health-basics',
-    category: 'mental-wellbeing',
-    summary: 'How to protect your mental health and stay strong through life\'s challenges.',
-    ageAppropriate: ['13-15', '16-18', '19-25', '26-30', '30+'],
-    image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=800',
-  },
-  {
-    id: '5',
-    title: 'Navigating Social Pressure',
-    slug: 'dealing-with-peer-pressure',
-    category: 'social-challenges',
-    summary: 'Strategies for staying true to yourself while navigating complex social circles.',
-    ageAppropriate: ['13-15', '16-18'],
-    image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=800',
-  },
-  {
-    id: '6',
-    title: 'Your Guide to Contraception',
-    slug: 'contraception-options',
-    category: 'reproductive-health',
-    summary: 'Professional overview of birth control methods available to young women.',
-    ageAppropriate: ['16-18', '19-25', '26-30', '30+'],
-    image: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&q=80&w=800',
-  },
-];
 
 const categories = [
   { key: 'personal-health', label: 'Personal Health', color: 'text-emerald-600', bg: 'bg-emerald-50' },
@@ -83,6 +27,8 @@ interface KnowledgeHubProps {
 }
 
 export const KnowledgeHub: React.FC<KnowledgeHubProps> = ({ userAgeRange: initialAgeRange }) => {
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [userAgeRange, setUserAgeRange] = useState<string | undefined>(initialAgeRange);
@@ -104,7 +50,25 @@ export const KnowledgeHub: React.FC<KnowledgeHubProps> = ({ userAgeRange: initia
     }
   }, [userAgeRange]);
 
-  const filteredArticles = MOCK_ARTICLES.filter((article) => {
+  // Fetch articles from the database
+  useEffect(() => {
+    const fetchArticles = async () => {
+      setIsLoading(true);
+      try {
+        const res = await fetch('/api/knowledge-hub');
+        if (res.ok) {
+          setArticles(await res.json());
+        }
+      } catch (error) {
+        console.error('Error fetching articles:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchArticles();
+  }, []);
+
+  const filteredArticles = articles.filter((article) => {
     const matchesSearch =
       article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       article.summary.toLowerCase().includes(searchTerm.toLowerCase());
@@ -112,7 +76,7 @@ export const KnowledgeHub: React.FC<KnowledgeHubProps> = ({ userAgeRange: initia
     const matchesCategory = !selectedCategory || article.category === selectedCategory;
 
     const matchesAge =
-      !userAgeRange || article.ageAppropriate.includes(userAgeRange);
+      !userAgeRange || article.age_appropriate.includes(userAgeRange);
 
     return matchesSearch && matchesCategory && matchesAge;
   });
