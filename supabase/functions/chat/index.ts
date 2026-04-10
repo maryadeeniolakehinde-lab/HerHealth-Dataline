@@ -89,36 +89,68 @@ async function getAvailableConsultants(supabase: any) {
 /**
  * Build medical-aware prompt for Ollama
  */
+interface UserDetails {
+  name?: string;
+  medicalHistory?: string;
+}
+
 function buildMedicalPrompt(
   userMessage: string,
   ageRange: string,
   state: string,
-  chatHistory?: Array<{ role: string; content: string }>
+  chatHistory: Array<{ role: string; content: string }> = [],
+  userDetails: UserDetails = {}
 ): string {
-  const systemPrompt = `You are HerHealth AI, a compassionate and supportive health assistant for young women.
-You provide general health information and guidance, NOT medical diagnoses.
+  // Build context from chat history
+  const historyContext = chatHistory.map(chat => `${chat.role}: ${chat.content}`).join('\n');
+  
+  // Build user context
+  const userContext = `
+User Profile:
+- Name: ${userDetails.name || 'Not specified'}
+- Age Range: ${ageRange}
+- Location: ${state}
+- Medical History: ${userDetails.medicalHistory || 'Not specified'}
+`;
 
-Guidelines:
-- ALWAYS remind users to consult healthcare professionals for medical concerns
-- Tailor responses to age group: ${ageRange}
-- Be aware of geographic context: ${state}
-- Use simple, non-judgmental language
-- Focus on education, self-care, and wellness
-- For reproductive health, use medically accurate terminology
-- Keep responses under 300 words
-- Be warm and supportive
+  // Medical expert context with skills and knowledge base
+  const medicalExpertContext = `
+You are an experienced medical professional (doctor/nurse) with access to comprehensive medical knowledge including:
+- Medical textbooks and clinical guidelines
+- Diagnostic procedures and treatment protocols
+- Patient communication best practices
+- Empathetic and calming communication skills
 
-${
-  chatHistory && chatHistory.length > 0
-    ? `Chat History:\n${chatHistory.map((msg) => `${msg.role}: ${msg.content}`).join("\n")}\n`
-    : ""
-}
+Your role is to:
+1. Provide accurate medical information based on established medical knowledge
+2. Communicate with empathy, patience, and reassurance
+3. Listen carefully to patient concerns and respond thoughtfully
+4. Encourage appropriate medical consultation when necessary
+5. Avoid making definitive diagnoses - always recommend seeing a qualified healthcare provider
 
-User (Age: ${ageRange}, Region: ${state}): ${userMessage}
+Important guidelines:
+- Never provide emergency medical advice - direct users to call emergency services for urgent situations
+- Acknowledge limitations of AI in medical diagnosis
+- Be supportive and understanding of patient concerns
+- Use clear, accessible language while maintaining medical accuracy
+- Consider the user's age, location, and medical history in your responses
+`;
 
-Respond as HerHealth AI:`;
+  // Combine all contexts
+  const fullPrompt = `
+${medicalExpertContext}
 
-  return systemPrompt;
+${userContext}
+
+Conversation History:
+${historyContext}
+
+Current Question: ${userMessage}
+
+Please provide a thoughtful, empathetic medical response:
+`;
+
+  return fullPrompt;
 }
 
 /**
@@ -308,7 +340,8 @@ Your safety is our priority. ❤️`,
     }
 
     // Route to AI
-    const prompt = buildMedicalPrompt(message, age_range, state, chat_history);
+    const userDetails = {};
+    const prompt = buildMedicalPrompt(message, age_range, state, chat_history, userDetails);
     const aiResponse = await callOllama(prompt);
 
     if (!aiResponse) {
