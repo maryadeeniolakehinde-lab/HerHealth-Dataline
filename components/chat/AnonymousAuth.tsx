@@ -13,6 +13,9 @@ export const AnonymousAuth: React.FC<AnonymousAuthProps> = ({
   const [step, setStep] = useState<'welcome' | 'input' | 'created'>('welcome');
   const [ageRange, setAgeRange] = useState('');
   const [state, setState] = useState('');
+  const [showForgotId, setShowForgotId] = useState(false);
+  const [recoveryState, setRecoveryState] = useState('');
+  const [recoveryDate, setRecoveryDate] = useState('');
   const [userId, setUserId] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -64,10 +67,74 @@ export const AnonymousAuth: React.FC<AnonymousAuthProps> = ({
     }
   };
 
-  const handleReturningUser = () => {
+  const handleReturningUser = async () => {
     const userIdInput = prompt('Enter your HerHealth ID (e.g., HHD-ABC123):');
-    if (userIdInput) {
+    if (!userIdInput) return;
+
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('/api/auth/get-profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userIdInput }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          alert('User ID not found. Please check your ID or create a new account.');
+          return;
+        }
+        throw new Error(data.error || 'Failed to verify user');
+      }
+
+      // User found, proceed
       onUserCreated(userIdInput);
+    } catch (error) {
+      console.error('Error:', error);
+      const message = error instanceof Error ? error.message : 'Failed to verify user. Please try again.';
+      alert(message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleForgotUserId = async () => {
+    if (!recoveryState || !recoveryDate) {
+      alert('Please provide both your state and approximate creation date');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('/api/auth/recover-user-id', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ state: recoveryState, created_date: recoveryDate }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to recover user ID');
+      }
+
+      if (data.user_ids && data.user_ids.length > 0) {
+        const userIds = data.user_ids.join(', ');
+        alert(`Found possible user IDs: ${userIds}\n\nTry these IDs one by one. If none work, you may need to create a new account.`);
+      } else {
+        alert('No user IDs found matching those details. You may need to create a new account.');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      const message = error instanceof Error ? error.message : 'Failed to recover user ID. Please try again.';
+      alert(message);
+    } finally {
+      setIsLoading(false);
+      setShowForgotId(false);
     }
   };
 
@@ -135,6 +202,13 @@ export const AnonymousAuth: React.FC<AnonymousAuthProps> = ({
             >
               Returning User? Sign In
             </button>
+
+            <button
+              onClick={() => setShowForgotId(true)}
+              className="w-full text-pink-600 hover:text-pink-800 font-medium py-2 px-6 text-sm"
+            >
+              Forgot your User ID?
+            </button>
           </div>
 
           {/* Info Box */}
@@ -148,6 +222,88 @@ export const AnonymousAuth: React.FC<AnonymousAuthProps> = ({
         </div>
       </div>
     );
+
+  // Forgot User ID Modal
+  if (showForgotId) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white rounded-3xl shadow-xl p-8">
+          <div className="text-center mb-6">
+            <div className="flex justify-center mb-4">
+              <div className="bg-gradient-to-br from-pink-500 to-purple-500 p-4 rounded-full">
+                <Heart className="w-8 h-8 text-white" />
+              </div>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">
+              Recover Your User ID
+            </h2>
+            <p className="text-gray-600 text-sm">
+              Since we're anonymous, we'll help you find your ID based on when and where you created your account.
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Your State
+              </label>
+              <select
+                value={recoveryState}
+                onChange={(e) => setRecoveryState(e.target.value)}
+                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-gray-900 focus:border-pink-500 focus:ring-2 focus:ring-pink-100"
+              >
+                <option value="">Select your state</option>
+                {nigerianStates.map((state) => (
+                  <option key={state} value={state}>
+                    {state}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Approximate Creation Date
+              </label>
+              <input
+                type="date"
+                value={recoveryDate}
+                onChange={(e) => setRecoveryDate(e.target.value)}
+                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-gray-900 focus:border-pink-500 focus:ring-2 focus:ring-pink-100"
+                max={new Date().toISOString().split('T')[0]}
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                We'll search within 3 days of this date
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-3 mt-6">
+            <button
+              onClick={handleForgotUserId}
+              disabled={isLoading || !recoveryState || !recoveryDate}
+              className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? 'Searching...' : 'Find My User ID'}
+            </button>
+
+            <button
+              onClick={() => setShowForgotId(false)}
+              className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-3 px-6 rounded-xl transition-all duration-200"
+            >
+              Back to Sign In
+            </button>
+          </div>
+
+          <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <p className="text-sm text-yellow-800">
+              <strong>Privacy Note:</strong> This search is anonymous and doesn't reveal any personal information. If no IDs are found, you may need to create a new account.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
   }
 
   if (step === 'input') {
