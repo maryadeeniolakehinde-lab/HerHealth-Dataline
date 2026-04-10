@@ -151,9 +151,14 @@ async function callOllama(prompt: string): Promise<string | null> {
       body: JSON.stringify({
         model: ollamaModel,
         prompt: prompt,
-        temperature: 0.7,
-        max_tokens: 1000,
+        temperature: 0.6,
+        max_tokens: 500,
         stream: false,
+        options: {
+          num_predict: 500,
+          top_k: 40,
+          top_p: 0.9,
+        }
       }),
     });
 

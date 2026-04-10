@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Send, AlertCircle, Heart, MessageCircle, Loader, User, ShieldCheck, ChevronLeft, MoreVertical, Info } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import type { ChatMessage as IChatMessage } from '@/types';
 import { saveChatMessage, getAvailableConsultants } from '@/lib/chat';
 import { getUserChatHistory } from '@/lib/auth';
@@ -245,7 +247,11 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                       <span className="font-bold text-xs uppercase tracking-tight text-red-600">Urgent Support</span>
                     </div>
                   )}
-                  <p className="text-[15px] leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                  <div className={`text-[15px] leading-relaxed markdown-content ${message.sender === 'user' ? 'text-white' : 'text-slate-800'}`}>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {message.content}
+                    </ReactMarkdown>
+                  </div>
                 </div>
               </div>
             ))
