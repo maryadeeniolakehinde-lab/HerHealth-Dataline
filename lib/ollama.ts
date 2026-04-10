@@ -3,6 +3,66 @@ const OLLAMA_API_KEY = process.env.OLLAMA_API_KEY;
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'gpt-oss:120b-cloud';
 
 /**
+ * Compress chat history to reduce token usage while preserving context
+ * Keeps recent messages intact and summarizes older ones
+ * This helps minimize API costs and improves response times by reducing token usage
+ */
+export const compressChatHistory = (
+  chatHistory: Array<{ role: string; content: string }>,
+  maxTokens: number = 2000,
+  keepRecent: number = 4
+): Array<{ role: string; content: string }> => {
+  if (!chatHistory || chatHistory.length === 0) {
+    return [];
+  }
+
+  // If history is small, return as is
+  if (chatHistory.length <= keepRecent) {
+    return chatHistory;
+  }
+
+  // Estimate tokens (rough approximation: 1 token ≈ 4 characters)
+  const estimateTokens = (text: string): number => {
+    return Math.ceil(text.length / 4);
+  };
+
+  // Keep recent messages intact
+  const recentMessages = chatHistory.slice(-keepRecent);
+  const olderMessages = chatHistory.slice(0, -keepRecent);
+
+  // Calculate tokens for recent messages
+  let recentTokens = recentMessages.reduce((sum, msg) => sum + estimateTokens(msg.content), 0);
+
+  // If recent messages alone exceed limit, truncate them
+  if (recentTokens >= maxTokens) {
+    return recentMessages.slice(-2); // Keep only last 2 messages if over limit
+  }
+
+  // Summarize older messages if needed
+  let availableTokens = maxTokens - recentTokens;
+  if (availableTokens <= 0) {
+    return recentMessages;
+  }
+
+  // Create summary of older messages
+  if (olderMessages.length > 0) {
+    const summaryPrompt = olderMessages.map(msg => `${msg.role}: ${msg.content}`).join('\n');
+    const summary = `[Summary of previous conversation: ${Math.min(olderMessages.length, 10)} earlier exchanges]`;
+    
+    // Add summary if it fits within token budget
+    const summaryTokens = estimateTokens(summary);
+    if (summaryTokens < availableTokens) {
+      return [
+        { role: 'system', content: summary },
+        ...recentMessages
+      ];
+    }
+  }
+
+  return recentMessages;
+};
+
+/**
  * Build medical context-aware prompt
  */
 export const buildMedicalPrompt = (
@@ -12,8 +72,11 @@ export const buildMedicalPrompt = (
   chatHistory: Array<{ role: string; content: string }> = [],
   userDetails: { name?: string; medicalHistory?: string } = {}
 ): string => {
-  // Build context from chat history
-  const chatContext = chatHistory.map(chat => `${chat.role}: ${chat.content}`).join('\n');
+  // Compress chat history to reduce token usage
+  const compressedHistory = compressChatHistory(chatHistory);
+  
+  // Build context from compressed chat history
+  const chatContext = compressedHistory.map(chat => `${chat.role}: ${chat.content}`).join('\n');
   
   // User profile context
   const userContext = `
