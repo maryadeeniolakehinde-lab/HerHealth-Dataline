@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Heart, ArrowRight, Lock, Eye, Shield } from 'lucide-react';
+import { Heart, ArrowRight, Lock, Eye, Shield, UserCircle, CheckCircle2, ChevronLeft, Search } from 'lucide-react';
 
 interface AnonymousAuthProps {
   onUserCreated: (userId: string) => void;
@@ -96,7 +96,6 @@ export const AnonymousAuth: React.FC<AnonymousAuthProps> = ({
       return;
     }
 
-    // Basic format validation: HHD- followed by hex characters
     const idRegex = /^HHD-[0-9A-F]{6}$/i;
     if (!idRegex.test(signinId.trim())) {
       setSigninError('Invalid ID format. Example: HHD-ABC123');
@@ -123,7 +122,6 @@ export const AnonymousAuth: React.FC<AnonymousAuthProps> = ({
         throw new Error(data.error || 'Failed to verify user');
       }
 
-      // User found, save to local storage and proceed
       if (typeof window !== 'undefined') {
         localStorage.setItem(
           'herhealth_session',
@@ -187,80 +185,72 @@ export const AnonymousAuth: React.FC<AnonymousAuthProps> = ({
 
   if (step === 'welcome') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 flex items-center justify-center p-4">
-        <div className="max-w-2xl w-full space-y-8">
-          {/* Logo & Title */}
-          <div className="text-center">
-            <div className="flex justify-center mb-4">
-              <div className="bg-gradient-to-br from-pink-500 to-purple-500 p-4 rounded-full">
-                <Heart className="w-12 h-12 text-white" />
+      <div className="min-h-screen bg-white flex flex-col md:flex-row">
+        {/* Left Side: Image & Content */}
+        <div className="md:w-1/2 relative overflow-hidden hidden md:block">
+          <img 
+            src="https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&q=80&w=1200" 
+            alt="Supportive community" 
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent flex flex-col justify-end p-12 text-white">
+            <h2 className="text-4xl font-display font-bold mb-4 leading-tight">Your voice matters, and your privacy is sacred.</h2>
+            <p className="text-lg text-slate-200">Join thousands of young women in Nigeria who are taking control of their health journey in a safe, judgment-free space.</p>
+          </div>
+        </div>
+
+        {/* Right Side: Auth Actions */}
+        <div className="md:w-1/2 flex items-center justify-center p-8 md:p-16 bg-slate-50">
+          <div className="max-w-md w-full space-y-10 animate-fade-in">
+            <div className="space-y-4">
+              <div className="bg-brand-600 w-12 h-12 rounded-xl flex items-center justify-center shadow-lg shadow-brand-200">
+                <Heart className="w-7 h-7 text-white" />
+              </div>
+              <h1 className="text-3xl font-display font-extrabold text-slate-900 tracking-tight">Welcome to HerHealth</h1>
+              <p className="text-slate-600 leading-relaxed">Choose how you'd like to proceed. No personal information is ever required.</p>
+            </div>
+
+            <div className="space-y-4">
+              <button
+                onClick={() => setStep('input')}
+                className="w-full btn-primary py-4 text-lg flex items-center justify-center gap-2 group"
+              >
+                Get Started
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </button>
+
+              <button
+                onClick={handleReturningUser}
+                className="w-full btn-secondary py-4 text-lg"
+              >
+                Returning User Sign In
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-6 pt-6 border-t border-slate-200">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-slate-900 font-bold">
+                  <Shield className="w-4 h-4 text-brand-600" />
+                  <span className="text-sm">100% Anonymous</span>
+                </div>
+                <p className="text-xs text-slate-500 leading-relaxed">No names, emails, or tracking. Your identity is safe.</p>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-slate-900 font-bold">
+                  <Lock className="w-4 h-4 text-brand-600" />
+                  <span className="text-sm">Secure Access</span>
+                </div>
+                <p className="text-xs text-slate-500 leading-relaxed">Your data is encrypted and protected by a unique ID.</p>
               </div>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-3">
-              HerHealth Dataline
-            </h1>
-            <p className="text-xl text-gray-600">
-              Your safe, anonymous space for health & wellness guidance
-            </p>
-          </div>
-
-          {/* Features Grid */}
-          <div className="grid md:grid-cols-3 gap-4">
-            <div className="bg-white rounded-lg p-6 shadow-md border-l-4 border-pink-500">
-              <Lock className="w-8 h-8 text-pink-500 mb-3" />
-              <h3 className="font-bold text-gray-800 mb-2">100% Anonymous</h3>
-              <p className="text-sm text-gray-600">
-                No names, emails, or personal info required
-              </p>
-            </div>
-            <div className="bg-white rounded-lg p-6 shadow-md border-l-4 border-purple-500">
-              <Eye className="w-8 h-8 text-purple-500 mb-3" />
-              <h3 className="font-bold text-gray-800 mb-2">Judgment-Free</h3>
-              <p className="text-sm text-gray-600">
-                Ask anything without fear or shame
-              </p>
-            </div>
-            <div className="bg-white rounded-lg p-6 shadow-md border-l-4 border-blue-500">
-              <Shield className="w-8 h-8 text-blue-500 mb-3" />
-              <h3 className="font-bold text-gray-800 mb-2">AI + Experts</h3>
-              <p className="text-sm text-gray-600">
-                Get guidance from AI and human consultants
-              </p>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="space-y-4">
-            <button
-              onClick={() => setStep('input')}
-              className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white font-bold py-4 px-6 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 text-lg"
-            >
-              New Here? Get Started
-              <ArrowRight className="w-5 h-5" />
-            </button>
-
-            <button
-              onClick={handleReturningUser}
-              className="w-full bg-white border-2 border-gray-300 hover:border-pink-500 text-gray-800 font-bold py-4 px-6 rounded-lg transition-all duration-200"
-            >
-              Returning User? Sign In
-            </button>
 
             <button
               onClick={() => setShowForgotId(true)}
-              className="w-full text-pink-600 hover:text-pink-800 font-medium py-2 px-6 text-sm"
+              className="w-full text-slate-500 hover:text-brand-600 font-semibold text-sm transition-colors flex items-center justify-center gap-2"
             >
+              <Search className="w-4 h-4" />
               Forgot your User ID?
             </button>
-          </div>
-
-          {/* Info Box */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
-            <p className="text-sm text-blue-900">
-              <strong>Your Privacy is Sacred:</strong> We collect only your age
-              group and state. This helps us provide better health guidance and
-              contributes to anonymous health advocacy.
-            </p>
           </div>
         </div>
       </div>
@@ -270,29 +260,21 @@ export const AnonymousAuth: React.FC<AnonymousAuthProps> = ({
   // Forgot User ID Modal
   if (showForgotId) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white rounded-3xl shadow-xl p-8">
-          <div className="text-center mb-6">
-            <div className="flex justify-center mb-4">
-              <div className="bg-gradient-to-br from-pink-500 to-purple-500 p-4 rounded-full">
-                <Heart className="w-8 h-8 text-white" />
-              </div>
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+        <div className="max-w-md w-full card shadow-2xl p-10 animate-slide-up">
+          <div className="text-center mb-8">
+            <div className="bg-brand-50 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <Search className="w-8 h-8 text-brand-600" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">
-              Recover Your User ID
-            </h2>
-            <p className="text-gray-600 text-sm">
-              Since we're anonymous, we'll help you find your ID based on when and where you created your account.
-            </p>
+            <h2 className="text-3xl font-display font-bold text-slate-900 mb-3">Recover Your ID</h2>
+            <p className="text-slate-600 text-sm">Fill in your security details to find your anonymous account.</p>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-6">
             {foundUserIds.length > 0 ? (
-              <div className="bg-green-50 border border-green-200 rounded-xl p-6 space-y-4">
-                <h3 className="font-bold text-green-800 text-sm uppercase tracking-wider">
-                  Found Possible IDs
-                </h3>
-                <div className="grid gap-2">
+              <div className="bg-brand-50 border border-brand-100 rounded-2xl p-6 space-y-4">
+                <h3 className="font-bold text-brand-900 text-xs uppercase tracking-widest">Possible Matches Found</h3>
+                <div className="grid gap-3">
                   {foundUserIds.map((id) => (
                     <button
                       key={id}
@@ -301,97 +283,81 @@ export const AnonymousAuth: React.FC<AnonymousAuthProps> = ({
                         setShowForgotId(false);
                         setStep('signin');
                       }}
-                      className="w-full bg-white border border-green-300 hover:border-green-500 text-green-700 font-mono font-bold py-3 px-4 rounded-lg transition-all text-left flex justify-between items-center group"
+                      className="w-full bg-white border border-slate-200 hover:border-brand-500 text-slate-900 font-mono font-bold py-3 px-4 rounded-xl transition-all text-left flex justify-between items-center group"
                     >
                       {id}
-                      <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-all text-brand-600" />
                     </button>
                   ))}
                 </div>
-                <p className="text-xs text-green-600 italic">
-                  Click an ID to use it for sign in
-                </p>
+                <p className="text-xs text-brand-600 italic">Select an ID to sign in.</p>
               </div>
             ) : (
-              <>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Your State
-                  </label>
+              <div className="space-y-5">
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-900 ml-1">Your State</label>
                   <select
                     value={recoveryState}
                     onChange={(e) => setRecoveryState(e.target.value)}
-                    className="w-full rounded-xl border border-gray-200 px-4 py-3 text-gray-900 focus:border-pink-500 focus:ring-2 focus:ring-pink-100"
+                    className="w-full"
                   >
                     <option value="">Select your state</option>
                     {nigerianStates.map((state) => (
-                      <option key={state} value={state}>
-                        {state}
-                      </option>
+                      <option key={state} value={state}>{state}</option>
                     ))}
                   </select>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Your Age Range
-                  </label>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-900 ml-1">Age Range</label>
                   <select
                     value={recoveryAgeRange}
                     onChange={(e) => setRecoveryAgeRange(e.target.value)}
-                    className="w-full rounded-xl border border-gray-200 px-4 py-3 text-gray-900 focus:border-pink-500 focus:ring-2 focus:ring-pink-100"
+                    className="w-full"
                   >
                     <option value="">Select your age range</option>
                     {ageRanges.map((range) => (
-                      <option key={range} value={range}>
-                        {range}
-                      </option>
+                      <option key={range} value={range}>{range}</option>
                     ))}
                   </select>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Security Question
-                  </label>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-900 ml-1">Security Question</label>
                   <select
                     value={recoveryQuestion}
                     onChange={(e) => setRecoveryQuestion(e.target.value)}
-                    className="w-full rounded-xl border border-gray-200 px-4 py-3 text-gray-900 focus:border-pink-500 focus:ring-2 focus:ring-pink-100"
+                    className="w-full"
                   >
-                    <option value="">Select your security question</option>
+                    <option value="">Select your question</option>
                     {recoveryQuestions.map((q) => (
-                      <option key={q} value={q}>
-                        {q}
-                      </option>
+                      <option key={q} value={q}>{q}</option>
                     ))}
                   </select>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Security Answer
-                  </label>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-900 ml-1">Security Answer</label>
                   <input
                     type="text"
                     value={recoveryAnswer}
                     onChange={(e) => setRecoveryAnswer(e.target.value)}
-                    placeholder="Enter your secret answer"
-                    className="w-full rounded-xl border border-gray-200 px-4 py-3 text-gray-900 focus:border-pink-500 focus:ring-2 focus:ring-pink-100"
+                    placeholder="Your secret answer"
+                    className="w-full"
                   />
                 </div>
-              </>
+              </div>
             )}
           </div>
 
-          <div className="space-y-3 mt-6">
+          <div className="space-y-3 mt-8">
             {!foundUserIds.length && (
               <button
                 onClick={handleForgotUserId}
                 disabled={isLoading || !recoveryState || !recoveryAgeRange || !recoveryQuestion || !recoveryAnswer}
-                className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full btn-primary py-3.5 disabled:opacity-50"
               >
-                {isLoading ? 'Verifying...' : 'Find My User ID'}
+                {isLoading ? 'Searching...' : 'Find My User ID'}
               </button>
             )}
 
@@ -400,16 +366,10 @@ export const AnonymousAuth: React.FC<AnonymousAuthProps> = ({
                 setShowForgotId(false);
                 setFoundUserIds([]);
               }}
-              className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-3 px-6 rounded-xl transition-all duration-200"
+              className="w-full btn-secondary py-3.5"
             >
               {foundUserIds.length > 0 ? 'Done' : 'Back to Sign In'}
             </button>
-          </div>
-
-          <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-            <p className="text-sm text-yellow-800">
-              <strong>Privacy Note:</strong> This search is anonymous and doesn't reveal any personal information. If no IDs are found, you may need to create a new account.
-            </p>
           </div>
         </div>
       </div>
@@ -418,27 +378,19 @@ export const AnonymousAuth: React.FC<AnonymousAuthProps> = ({
 
   if (step === 'signin') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white rounded-3xl shadow-xl p-8">
-          <div className="text-center mb-6">
-            <div className="flex justify-center mb-4">
-              <div className="bg-gradient-to-br from-pink-500 to-purple-500 p-4 rounded-full">
-                <Heart className="w-8 h-8 text-white" />
-              </div>
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+        <div className="max-w-md w-full card shadow-2xl p-10 animate-slide-up">
+          <div className="text-center mb-8">
+            <div className="bg-brand-50 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <UserCircle className="w-8 h-8 text-brand-600" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">
-              Welcome Back!
-            </h2>
-            <p className="text-gray-600 text-sm">
-              Enter your HerHealth ID to access your account.
-            </p>
+            <h2 className="text-3xl font-display font-bold text-slate-900 mb-3">Welcome Back</h2>
+            <p className="text-slate-600 text-sm">Enter your HerHealth ID to access your chat history.</p>
           </div>
 
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                User ID
-              </label>
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-slate-900 ml-1">User ID</label>
               <input
                 type="text"
                 value={signinId}
@@ -447,51 +399,40 @@ export const AnonymousAuth: React.FC<AnonymousAuthProps> = ({
                   setSigninError('');
                 }}
                 placeholder="HHD-ABC123"
-                className={`w-full rounded-xl border ${
-                  signinError ? 'border-red-500' : 'border-gray-200'
-                } px-4 py-3 text-gray-900 focus:border-pink-500 focus:ring-2 focus:ring-pink-100 uppercase font-mono`}
+                className={`w-full font-mono font-bold tracking-wider text-lg uppercase ${
+                  signinError ? 'border-red-500 ring-2 ring-red-50' : 'border-slate-200'
+                }`}
               />
               {signinError && (
-                <p className="text-red-500 text-xs mt-1">{signinError}</p>
+                <p className="text-red-500 text-xs font-semibold ml-1">{signinError}</p>
               )}
             </div>
           </div>
 
-          <div className="space-y-3 mt-6">
+          <div className="space-y-3 mt-8">
             <button
               onClick={handleVerifyId}
               disabled={isLoading || !signinId}
-              className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full btn-primary py-3.5 disabled:opacity-50"
             >
               {isLoading ? 'Verifying...' : 'Sign In'}
             </button>
 
             <button
               onClick={() => setStep('welcome')}
-              className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-3 px-6 rounded-xl transition-all duration-200"
+              className="w-full btn-secondary py-3.5"
             >
               Back
             </button>
           </div>
 
-          <div className="mt-6 text-center space-y-2">
+          <div className="mt-8 text-center pt-6 border-t border-slate-100">
             <button
               onClick={() => setShowForgotId(true)}
-              className="text-pink-600 hover:text-pink-800 text-sm font-medium"
+              className="text-brand-600 hover:text-brand-700 text-sm font-bold"
             >
               Forgot your User ID?
             </button>
-            <div className="pt-2">
-              <p className="text-xs text-gray-500">
-                Don't have an ID?{' '}
-                <button
-                  onClick={() => setStep('input')}
-                  className="text-purple-600 hover:text-purple-800 font-bold"
-                >
-                  Get Started
-                </button>
-              </p>
-            </div>
           </div>
         </div>
       </div>
@@ -500,27 +441,27 @@ export const AnonymousAuth: React.FC<AnonymousAuthProps> = ({
 
   if (step === 'input') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">
-            Tell Us About You
-          </h2>
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+        <div className="max-w-lg w-full card shadow-2xl p-10 animate-slide-up">
+          <div className="flex items-center gap-4 mb-8">
+            <button onClick={() => setStep('welcome')} className="p-2 hover:bg-slate-100 rounded-xl transition-colors">
+              <ChevronLeft className="w-6 h-6 text-slate-600" />
+            </button>
+            <h2 className="text-2xl font-display font-bold text-slate-900">Create Your Profile</h2>
+          </div>
 
-          <div className="space-y-4">
-            {/* Age Range */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Age Range
-              </label>
-              <div className="grid grid-cols-2 gap-2">
+          <div className="space-y-8">
+            <div className="space-y-4">
+              <label className="text-sm font-bold text-slate-900 block ml-1 uppercase tracking-wider">How old are you?</label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {ageRanges.map((range) => (
                   <button
                     key={range}
                     onClick={() => setAgeRange(range)}
-                    className={`py-2 px-3 rounded-lg font-medium transition-all ${
+                    className={`py-3 px-4 rounded-xl font-bold transition-all border-2 ${
                       ageRange === range
-                        ? 'bg-pink-500 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        ? 'bg-brand-600 border-brand-600 text-white shadow-lg shadow-brand-100 scale-105'
+                        : 'bg-white border-slate-100 text-slate-600 hover:border-brand-200'
                     }`}
                   >
                     {range}
@@ -529,79 +470,57 @@ export const AnonymousAuth: React.FC<AnonymousAuthProps> = ({
               </div>
             </div>
 
-            {/* State */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                State/Region
-              </label>
+            <div className="space-y-4">
+              <label className="text-sm font-bold text-slate-900 block ml-1 uppercase tracking-wider">Where are you located?</label>
               <select
                 value={state}
                 onChange={(e) => setState(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-200"
+                className="w-full text-lg"
               >
                 <option value="">Select your state...</option>
                 {nigerianStates.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
+                  <option key={s} value={s}>{s}</option>
                 ))}
               </select>
             </div>
 
-            {/* Security Question */}
-            <div className="pt-4 border-t border-gray-100">
-              <label className="block text-sm font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                <Lock className="w-4 h-4 text-pink-500" />
-                Security Recovery
-              </label>
-              <div className="space-y-3">
+            <div className="space-y-4 pt-6 border-t border-slate-100">
+              <div className="flex items-center gap-2 mb-2">
+                <Lock className="w-5 h-5 text-brand-600" />
+                <label className="text-sm font-bold text-slate-900 uppercase tracking-wider">Recovery Security</label>
+              </div>
+              <div className="space-y-4">
                 <select
                   value={newRecoveryQuestion}
                   onChange={(e) => setNewRecoveryQuestion(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-200 text-sm"
+                  className="w-full text-sm"
                 >
-                  <option value="">Pick a security question...</option>
+                  <option value="">Choose a security question...</option>
                   {recoveryQuestions.map((q) => (
-                    <option key={q} value={q}>
-                      {q}
-                    </option>
+                    <option key={q} value={q}>{q}</option>
                   ))}
                 </select>
                 <input
                   type="text"
                   value={newRecoveryAnswer}
                   onChange={(e) => setNewRecoveryAnswer(e.target.value)}
-                  placeholder="Your secret answer..."
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-200 text-sm"
+                  placeholder="Your secret answer"
+                  className="w-full"
                 />
-                <p className="text-[10px] text-gray-500 leading-tight">
-                  This is the only way to recover your account if you lose your ID. 
-                  Choose something only you know.
+                <p className="text-[11px] text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-100 leading-relaxed italic">
+                  This question helps you recover your ID if you lose it. Make sure it's something only you know.
                 </p>
               </div>
             </div>
-
-            {/* Info */}
-            <p className="text-xs text-gray-500 mt-4">
-              We only use this to tailor health information to your location and
-              age group. Your privacy is completely protected.
-            </p>
           </div>
 
-          {/* Buttons */}
-          <div className="flex gap-3 mt-8">
-            <button
-              onClick={() => setStep('welcome')}
-              className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg transition-colors"
-            >
-              Back
-            </button>
+          <div className="flex gap-4 mt-10">
             <button
               onClick={handleCreateNew}
               disabled={!ageRange || !state || !newRecoveryQuestion || !newRecoveryAnswer || isLoading}
-              className="flex-1 bg-pink-500 hover:bg-pink-600 disabled:bg-gray-400 text-white font-bold py-2 px-4 rounded-lg transition-colors disabled:cursor-not-allowed"
+              className="w-full btn-primary py-4 text-lg disabled:opacity-50"
             >
-              {isLoading ? 'Creating...' : 'Create Account'}
+              {isLoading ? 'Creating Your Account...' : 'Create Account'}
             </button>
           </div>
         </div>
@@ -610,50 +529,44 @@ export const AnonymousAuth: React.FC<AnonymousAuthProps> = ({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-8 text-center space-y-6">
-        <div className="flex justify-center">
-          <div className="bg-green-100 rounded-full p-4">
-            <Heart className="w-8 h-8 text-green-600" />
-          </div>
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+      <div className="max-w-md w-full card shadow-2xl p-10 text-center space-y-8 animate-slide-up">
+        <div className="bg-brand-50 w-20 h-20 rounded-3xl flex items-center justify-center mx-auto">
+          <CheckCircle2 className="w-10 h-10 text-brand-600" />
         </div>
 
-        <div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">
-            Welcome to HerHealth!
-          </h2>
-          <p className="text-gray-600">Your unique ID is:</p>
+        <div className="space-y-3">
+          <h2 className="text-3xl font-display font-bold text-slate-900">Account Created!</h2>
+          <p className="text-slate-600">Your unique HerHealth ID is ready. Please save this in a safe place.</p>
         </div>
 
-        <div className="bg-pink-50 border-2 border-pink-300 rounded-lg p-4">
-          <p className="text-2xl font-bold text-pink-600 font-mono">{userId}</p>
-          <p className="text-xs text-gray-600 mt-2">
-            Save this ID to access your account anytime
+        <div className="bg-slate-50 border-2 border-brand-100 rounded-2xl p-6 relative group overflow-hidden">
+          <div className="absolute inset-0 bg-brand-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <p className="text-4xl font-display font-extrabold text-brand-600 font-mono tracking-widest">{userId}</p>
+          <button
+            onClick={() => {
+              if (typeof navigator !== 'undefined' && navigator.clipboard) {
+                navigator.clipboard.writeText(userId);
+                alert('ID copied to clipboard!');
+              }
+            }}
+            className="mt-4 text-xs font-bold text-brand-700 uppercase tracking-widest hover:text-brand-900 transition-colors underline underline-offset-4"
+          >
+            Copy ID
+          </button>
+        </div>
+
+        <div className="space-y-4 pt-4">
+          <button
+            onClick={handleProceed}
+            className="w-full btn-primary py-4 text-lg"
+          >
+            Continue to Chat
+          </button>
+          <p className="text-xs text-slate-500 leading-relaxed px-4">
+            You will need this ID every time you return to HerHealth Dataline. Keep it safe.
           </p>
         </div>
-
-        <button
-          onClick={() => {
-            if (typeof navigator !== 'undefined' && navigator.clipboard) {
-              navigator.clipboard.writeText(userId);
-              alert('ID copied to clipboard!');
-            }
-          }}
-          className="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg transition-colors"
-        >
-          Copy ID
-        </button>
-
-        <button
-          onClick={handleProceed}
-          className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white font-bold py-3 px-6 rounded-lg transition-all"
-        >
-          Continue to Chat
-        </button>
-
-        <p className="text-xs text-gray-500">
-          You&apos;ll need this ID to access your account and chat history
-        </p>
       </div>
     </div>
   );

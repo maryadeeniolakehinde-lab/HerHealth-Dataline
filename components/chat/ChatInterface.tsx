@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, AlertCircle, Heart, MessageCircle, Loader } from 'lucide-react';
+import { Send, AlertCircle, Heart, MessageCircle, Loader, User, ShieldCheck, ChevronLeft, MoreVertical, Info } from 'lucide-react';
 import type { ChatMessage as IChatMessage } from '@/types';
 import { saveChatMessage, getAvailableConsultants } from '@/lib/chat';
 import { getUserChatHistory } from '@/lib/auth';
+import Link from 'next/link';
 
 interface ChatMessage {
   id: string;
@@ -79,6 +80,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     };
 
     setMessages((prev) => [...prev, userMessage]);
+    const currentInput = input;
     setInput('');
     setIsLoading(true);
 
@@ -89,7 +91,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           user_id: userId,
-          message: input,
+          message: currentInput,
           age_range: ageRange,
           state: state,
           chat_history: messages.map((msg) => ({
@@ -114,12 +116,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         consultantName: data.routed_to === 'consultant' ? 'Live Consultant' : undefined,
       };
 
-      // If emergency, show emergency message
       if (data.is_emergency && data.emergency_message) {
         assistantMessage.content = data.emergency_message;
       }
 
-      // Save assistant response to DB ONLY if it's not from AI (Edge function handles AI saves)
       if (data.routed_to !== 'ai') {
         await saveChatMessage(
           userId,
@@ -139,8 +139,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       console.error('Error:', error);
       const errorMessage: ChatMessage = {
         id: `error-${Date.now()}`,
-        content:
-          'Sorry, I encountered an error. Please try again or check back later.',
+        content: 'Sorry, I encountered an error. Please try again or check back later.',
         sender: 'ai',
         timestamp: new Date().toISOString(),
       };
@@ -151,91 +150,111 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
+    <div className="flex flex-col h-screen bg-slate-50">
       {/* Header */}
-      <div className="bg-white border-b border-pink-100 shadow-sm">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+      <header className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-10 shadow-sm">
+        <div className="flex items-center gap-4">
+          <Link href="/" className="p-2 hover:bg-slate-50 rounded-xl transition-colors md:hidden">
+            <ChevronLeft className="w-5 h-5 text-slate-600" />
+          </Link>
           <div className="flex items-center gap-3">
-            <Heart className="w-6 h-6 text-pink-500" />
-            <h1 className="text-2xl font-bold text-gray-800">HerHealth AI</h1>
-          </div>
-          <div className="flex items-center gap-2 text-sm">
-            {currentConsultant ? (
-              <span className="text-green-600 font-medium flex items-center gap-1">
-                <MessageCircle className="w-4 h-4" /> Live Consultant
-              </span>
-            ) : (
-              <span className="text-gray-600 flex items-center gap-1">
-                <MessageCircle className="w-4 h-4" /> Connected
-              </span>
-            )}
+            <div className="relative">
+              <div className="w-10 h-10 bg-brand-100 rounded-full flex items-center justify-center">
+                <Heart className="w-6 h-6 text-brand-600" />
+              </div>
+              <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full"></div>
+            </div>
+            <div>
+              <h1 className="text-lg font-display font-bold text-slate-900 leading-tight">HerHealth Assistant</h1>
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Secure & Anonymous</span>
+                <ShieldCheck className="w-3 h-3 text-brand-500" />
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+        <div className="flex items-center gap-2">
+          <div className="hidden sm:flex flex-col items-end mr-4">
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-tighter">Your ID</span>
+            <span className="text-xs font-mono font-bold text-brand-600">{userId}</span>
+          </div>
+          <button className="p-2.5 hover:bg-slate-50 rounded-xl transition-colors">
+            <Info className="w-5 h-5 text-slate-400" />
+          </button>
+        </div>
+      </header>
 
-      {/* Messages Container */}
-      <div className="flex-1 overflow-y-auto px-4 py-6">
-        <div className="max-w-4xl mx-auto space-y-4">
+      {/* Messages */}
+      <main className="flex-1 overflow-y-auto px-4 py-8 md:px-8">
+        <div className="max-w-4xl mx-auto space-y-8">
           {messages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-center py-12">
-              <Heart className="w-16 h-16 text-pink-300 mb-4" />
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                Welcome to HerHealth
-              </h2>
-              <p className="text-gray-600 mb-4">
-                Ask me anything about your health and wellness. Your questions
-                are completely anonymous.
+            <div className="flex flex-col items-center justify-center h-full text-center py-20 animate-fade-in">
+              <div className="w-24 h-24 bg-brand-50 rounded-3xl flex items-center justify-center mb-8 rotate-3">
+                <MessageCircle className="w-12 h-12 text-brand-600 -rotate-3" />
+              </div>
+              <h2 className="text-3xl font-display font-extrabold text-slate-900 mb-4">Hello! How can we help today?</h2>
+              <p className="text-slate-500 max-w-sm mx-auto leading-relaxed">
+                Ask any questions about your health or wellbeing. We're here to provide safe, anonymous guidance.
               </p>
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-left max-w-md">
-                <p className="text-sm text-blue-800">
-                  <strong>Privacy Note:</strong> We don&apos;t collect any personal
-                  information. Your unique ID is your only identifier.
-                </p>
+              <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-xl text-left">
+                <div className="bg-white border border-slate-100 p-5 rounded-2xl shadow-sm hover:border-brand-200 transition-all cursor-pointer group">
+                  <h4 className="font-bold text-slate-900 mb-1 group-hover:text-brand-600">Personal Health</h4>
+                  <p className="text-sm text-slate-500">Ask about nutrition, fitness, and overall wellness.</p>
+                </div>
+                <div className="bg-white border border-slate-100 p-5 rounded-2xl shadow-sm hover:border-brand-200 transition-all cursor-pointer group">
+                  <h4 className="font-bold text-slate-900 mb-1 group-hover:text-brand-600">Reproductive Health</h4>
+                  <p className="text-sm text-slate-500">Safe guidance on periods, puberty, and rights.</p>
+                </div>
               </div>
             </div>
           ) : (
             messages.map((message) => (
               <div
                 key={message.id}
-                className={`flex ${
-                  message.sender === 'user' ? 'justify-end' : 'justify-start'
-                }`}
+                className={`flex flex-col ${
+                  message.sender === 'user' ? 'items-end' : 'items-start'
+                } animate-slide-up`}
               >
+                <div className="flex items-center gap-2 mb-1.5 px-1">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    {message.sender === 'user' ? 'You' : message.sender === 'ai' ? 'HerHealth AI' : 'Live Consultant'}
+                  </span>
+                  <span className="text-[10px] text-slate-300">•</span>
+                  <span className="text-[10px] text-slate-300">
+                    {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </div>
                 <div
-                  className={`max-w-xs lg:max-w-md px-4 py-3 rounded-lg ${
+                  className={`max-w-[85%] md:max-w-[70%] ${
                     message.sender === 'user'
-                      ? 'bg-pink-500 text-white rounded-br-none'
+                      ? 'chat-bubble-user'
                       : message.isEmergency
-                      ? 'bg-red-100 border border-red-300 text-gray-800 rounded-bl-none'
-                      : 'bg-white border border-gray-200 text-gray-800 rounded-bl-none'
+                      ? 'bg-red-50 border border-red-100 text-red-900 rounded-2xl rounded-tl-none px-4 py-3 shadow-sm'
+                      : 'chat-bubble-bot'
                   }`}
                 >
                   {message.isEmergency && (
-                    <div className="flex items-center gap-2 mb-2 text-red-600">
-                      <AlertCircle className="w-5 h-5" />
-                      <span className="font-bold text-sm">Emergency Alert</span>
+                    <div className="flex items-center gap-2 mb-2 pb-2 border-b border-red-100">
+                      <AlertCircle className="w-4 h-4 text-red-600" />
+                      <span className="font-bold text-xs uppercase tracking-tight text-red-600">Urgent Support</span>
                     </div>
                   )}
-                  <p className="text-sm">{message.content}</p>
-                  {message.consultantName && (
-                    <p className="text-xs mt-2 opacity-75 font-medium">
-                      {message.consultantName}
-                    </p>
-                  )}
-                  <p className="text-xs mt-2 opacity-50">
-                    {new Date(message.timestamp).toLocaleTimeString()}
-                  </p>
+                  <p className="text-[15px] leading-relaxed whitespace-pre-wrap">{message.content}</p>
                 </div>
               </div>
             ))
           )}
 
           {isLoading && (
-            <div className="flex justify-start">
-              <div className="bg-white border border-gray-200 rounded-lg rounded-bl-none px-4 py-3">
-                <div className="flex gap-2">
-                  <Loader className="w-4 h-4 animate-spin text-pink-500" />
-                  <span className="text-sm text-gray-600">Thinking...</span>
+            <div className="flex flex-col items-start animate-pulse">
+              <div className="flex items-center gap-2 mb-1.5 px-1">
+                <span className="text-[10px] font-bold text-brand-400 uppercase tracking-widest">HerHealth AI is thinking</span>
+              </div>
+              <div className="chat-bubble-bot flex items-center gap-3">
+                <div className="flex gap-1">
+                  <div className="w-1.5 h-1.5 bg-brand-200 rounded-full animate-bounce"></div>
+                  <div className="w-1.5 h-1.5 bg-brand-300 rounded-full animate-bounce delay-75"></div>
+                  <div className="w-1.5 h-1.5 bg-brand-400 rounded-full animate-bounce delay-150"></div>
                 </div>
               </div>
             </div>
@@ -243,39 +262,42 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
           <div ref={messagesEndRef} />
         </div>
-      </div>
+      </main>
 
-      {/* Input Area */}
-      <div className="bg-white border-t border-pink-100 p-4">
+      {/* Input */}
+      <footer className="bg-white border-t border-slate-200 p-4 md:p-6 sticky bottom-0">
         <div className="max-w-4xl mx-auto">
-          <form onSubmit={handleSendMessage} className="flex gap-3">
+          <form onSubmit={handleSendMessage} className="relative group">
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask your question..."
+              placeholder="Type your question here..."
               disabled={isLoading}
-              className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-200 disabled:bg-gray-100 text-gray-800"
+              className="w-full pl-6 pr-16 py-4 md:py-5 bg-slate-50 border-transparent hover:bg-slate-100 focus:bg-white focus:border-brand-300 focus:ring-4 focus:ring-brand-50 text-slate-900 text-lg placeholder:text-slate-400 transition-all rounded-[2rem]"
             />
             <button
               type="submit"
               disabled={isLoading || !input.trim()}
-              className="bg-pink-500 hover:bg-pink-600 disabled:bg-gray-400 text-white px-6 py-3 rounded-lg font-medium flex items-center gap-2 transition-colors"
+              className="absolute right-2 top-2 bottom-2 px-6 bg-brand-600 hover:bg-brand-700 disabled:bg-slate-200 text-white rounded-full transition-all flex items-center justify-center shadow-lg shadow-brand-100 disabled:shadow-none"
             >
-              {isLoading ? (
-                <Loader className="w-4 h-4 animate-spin" />
-              ) : (
-                <Send className="w-4 h-4" />
-              )}
-              Send
+              <Send className={`w-5 h-5 ${isLoading ? 'opacity-0' : 'opacity-100'}`} />
+              {isLoading && <Loader className="w-5 h-5 animate-spin absolute" />}
             </button>
           </form>
-          <p className="text-xs text-gray-500 mt-2">
-            💡 Tip: Remember, AI responses are general guidance only. Always
-            consult a doctor for medical concerns.
-          </p>
+          <div className="flex items-center justify-center gap-4 mt-4">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-slate-300" />
+              End-to-end encrypted
+            </p>
+            <span className="text-slate-200 text-xs">|</span>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+              <User className="w-3.5 h-3.5 text-slate-300" />
+              Fully Anonymous
+            </p>
+          </div>
         </div>
-      </div>
+      </footer>
     </div>
   );
 };

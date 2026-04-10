@@ -1,145 +1,81 @@
 'use client';
 
-import React, { useState } from 'react';
-import { CheckCircle, AlertCircle, Heart } from 'lucide-react';
+import React from 'react';
+import { ShieldAlert, CheckCircle2, Heart, ArrowRight, Info } from 'lucide-react';
 
-interface DisclaimerProps {
+interface DisclaimerComponentProps {
   onAccept: () => void;
 }
 
-export const DisclaimerComponent: React.FC<DisclaimerProps> = ({
+export const DisclaimerComponent: React.FC<DisclaimerComponentProps> = ({
   onAccept,
 }) => {
-  const [accepted, setAccepted] = useState(false);
-
-  const handleAccept = () => {
-    setAccepted(true);
-    localStorage.setItem('herhealth_disclaimer_accepted', 'true');
-    onAccept();
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-pink-500 to-purple-500 text-white p-6 rounded-t-lg">
-          <div className="flex items-center gap-3 mb-2">
-            <Heart className="w-8 h-8" />
-            <h1 className="text-3xl font-bold">HerHealth Dataline</h1>
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+      <div className="max-w-2xl w-full card shadow-2xl p-0 overflow-hidden animate-slide-up">
+        <div className="gradient-primary p-10 text-white relative">
+          <div className="absolute top-0 right-0 p-8 opacity-10">
+            <ShieldAlert className="w-32 h-32" />
           </div>
-          <p className="text-pink-100">
-            Your safe, anonymous space for health & wellness
-          </p>
+          <div className="relative z-10 space-y-4">
+            <div className="bg-white/20 w-12 h-12 rounded-xl flex items-center justify-center backdrop-blur-md">
+              <Heart className="w-7 h-7 text-white" />
+            </div>
+            <h1 className="text-3xl font-display font-extrabold tracking-tight">Your Health & Safety First</h1>
+            <p className="text-brand-50 text-lg leading-relaxed">Please read our guidance disclaimer before you start chatting with HerHealth Assistant.</p>
+          </div>
         </div>
 
-        {/* Content */}
-        <div className="p-8 space-y-6">
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold text-gray-800">
-              Important Disclaimer
-            </h2>
-
-            <div className="bg-blue-50 border-l-4 border-blue-500 p-4 space-y-3">
-              <div className="flex gap-3">
-                <AlertCircle className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" />
-                <div>
-                  <h3 className="font-bold text-blue-900 mb-1">
-                    Medical Guidance Only
-                  </h3>
-                  <p className="text-sm text-blue-800">
-                    HerHealth provides educational information and general
-                    guidance. Our responses are NOT medical diagnoses or
-                    professional medical advice.
-                  </p>
-                </div>
+        <div className="p-10 space-y-8">
+          <div className="space-y-6">
+            <div className="flex gap-4 group">
+              <div className="w-10 h-10 bg-brand-50 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-brand-100 transition-colors">
+                <Info className="w-5 h-5 text-brand-600" />
+              </div>
+              <div>
+                <h3 className="font-bold text-slate-900 mb-1">General Information Only</h3>
+                <p className="text-slate-600 text-sm leading-relaxed">
+                  HerHealth AI provides general health guidance and is not a substitute for professional medical advice, diagnosis, or treatment.
+                </p>
               </div>
             </div>
 
-            <div className="bg-red-50 border-l-4 border-red-500 p-4 space-y-3">
-              <div className="flex gap-3">
-                <AlertCircle className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
-                <div>
-                  <h3 className="font-bold text-red-900 mb-1">
-                    When to Seek Professional Help
-                  </h3>
-                  <p className="text-sm text-red-800 mb-2">
-                    Please consult a qualified healthcare professional if you:
-                  </p>
-                  <ul className="text-sm text-red-800 space-y-1 list-disc list-inside">
-                    <li>Have medical concerns or symptoms</li>
-                    <li>Are experiencing pain or discomfort</li>
-                    <li>Have thoughts of self-harm or suicide</li>
-                    <li>Are in an emergency situation</li>
-                  </ul>
-                </div>
+            <div className="flex gap-4 group">
+              <div className="w-10 h-10 bg-brand-50 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-brand-100 transition-colors">
+                <ShieldAlert className="w-5 h-5 text-brand-600" />
+              </div>
+              <div>
+                <h3 className="font-bold text-slate-900 mb-1">Not for Emergencies</h3>
+                <p className="text-slate-600 text-sm leading-relaxed">
+                  If you are experiencing a medical emergency, please call <strong>112</strong> immediately or visit the nearest healthcare facility.
+                </p>
               </div>
             </div>
 
-            <div className="bg-green-50 border-l-4 border-green-500 p-4 space-y-3">
-              <div className="flex gap-3">
-                <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" />
-                <div>
-                  <h3 className="font-bold text-green-900 mb-1">
-                    Your Privacy is Protected
-                  </h3>
-                  <p className="text-sm text-green-800 mb-2">
-                    HerHealth is completely anonymous:
-                  </p>
-                  <ul className="text-sm text-green-800 space-y-1 list-disc list-inside">
-                    <li>No names, emails, or phone numbers collected</li>
-                    <li>You&apos;re identified only by a unique ID</li>
-                    <li>All data is encrypted and secure</li>
-                    <li>Anonymized data helps NGOs advocate for women&apos;s health</li>
-                  </ul>
-                </div>
+            <div className="flex gap-4 group">
+              <div className="w-10 h-10 bg-brand-50 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-brand-100 transition-colors">
+                <CheckCircle2 className="w-5 h-5 text-brand-600" />
               </div>
-            </div>
-
-            <div className="bg-purple-50 border-l-4 border-purple-500 p-4 space-y-3">
-              <div className="flex gap-3">
-                <Heart className="w-6 h-6 text-purple-600 flex-shrink-0 mt-0.5" />
-                <div>
-                  <h3 className="font-bold text-purple-900 mb-1">
-                    In Crisis? We&apos;re Here to Help
-                  </h3>
-                  <p className="text-sm text-purple-800 mb-2">
-                    If you&apos;re in immediate danger or having a mental health
-                    emergency:
-                  </p>
-                  <ul className="text-sm text-purple-800 space-y-1">
-                    <li>🚨 Call emergency services (112 in Nigeria)</li>
-                    <li>💬 Local mental health support: +2348167068027</li>
-                    <li>💬 If you are in immediate danger, go to the nearest hospital or emergency clinic</li>
-                  </ul>
-                </div>
+              <div>
+                <h3 className="font-bold text-slate-900 mb-1">Privacy & Data</h3>
+                <p className="text-slate-600 text-sm leading-relaxed">
+                  Your chat is anonymous. We use anonymized data to improve healthcare advocacy for young women in Nigeria.
+                </p>
               </div>
             </div>
           </div>
 
-          {/* Acceptance */}
-          <div className="border-t pt-6">
-            <label className="flex items-start gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={accepted}
-                onChange={(e) => setAccepted(e.target.checked)}
-                className="w-5 h-5 mt-1 rounded border-gray-300 text-pink-600 focus:ring-pink-500"
-              />
-              <span className="text-sm text-gray-700">
-                I acknowledge this disclaimer and understand that HerHealth
-                provides educational guidance, not medical diagnoses. I will
-                consult healthcare professionals for medical concerns and will
-                seek emergency help if needed.
-              </span>
-            </label>
-
+          <div className="pt-6 border-t border-slate-100">
             <button
-              onClick={handleAccept}
-              disabled={!accepted}
-              className="w-full mt-6 bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 disabled:from-gray-300 disabled:to-gray-300 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 disabled:cursor-not-allowed"
+              onClick={onAccept}
+              className="w-full btn-primary py-4 text-lg flex items-center justify-center gap-2 group"
             >
-              I Understand & Accept
+              I Understand and Accept
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </button>
+            <p className="text-center text-xs text-slate-400 mt-4 font-medium uppercase tracking-widest">
+              By clicking, you agree to our Terms of Service
+            </p>
           </div>
         </div>
       </div>

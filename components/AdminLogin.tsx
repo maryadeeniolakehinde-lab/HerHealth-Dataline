@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { Shield, Mail, Lock, AlertCircle, CheckCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import Link from 'next/link';
+import { Mail, Lock, AlertCircle, Heart, ShieldCheck, ArrowRight, ChevronLeft } from 'lucide-react';
 import { setAdminSession } from '@/lib/adminAuth';
 
 interface AdminLoginProps {
@@ -107,221 +108,182 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess }) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({
+          email,
+          password,
+          token: adminToken,
+        }),
       });
 
       const data = await response.json();
-      if (!response.ok || !data.success) {
+      if (!response.ok) {
         setError(data.error || 'Failed to set password');
         return;
       }
 
-      setAdminSession(email, adminToken);
+      setAdminSession(email, data.token);
       if (onLoginSuccess) {
         onLoginSuccess();
       } else {
         window.location.href = '/admin';
       }
     } catch (err) {
-      setError('Unable to set password. Please try again.');
-      console.error('Password setup error:', err);
+      setError('Password setup failed. Please try again.');
+      console.error('Admin password setup error:', err);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md bg-white border border-gray-200 rounded-3xl shadow-xl p-8">
-        <div className="flex items-center justify-center mb-8">
-          <div className="bg-pink-100 text-pink-700 rounded-full p-4 shadow-sm">
-            <Shield className="w-8 h-8" />
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+      <div className="max-w-md w-full space-y-8">
+        <div className="text-center space-y-4">
+          <div className="bg-slate-900 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto shadow-xl rotate-3 group hover:rotate-0 transition-transform">
+            <ShieldCheck className="w-9 h-9 text-white" />
           </div>
+          <h1 className="text-3xl font-display font-extrabold text-slate-900 tracking-tight">Admin Portal</h1>
+          <p className="text-slate-500 font-medium">Secure access for HerHealth administrators.</p>
         </div>
 
-        {step === 'email' ? (
-          <>
-            <h1 className="text-2xl font-bold text-gray-900 text-center mb-3">
-              Admin Access
-            </h1>
-            <p className="text-center text-gray-500 mb-6">
-              Enter your email to access the admin dashboard.
-            </p>
-
-            <form className="space-y-5" onSubmit={handleEmailSubmit}>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="email">
-                  Email address
-                </label>
-                <div className="relative rounded-xl border border-gray-200 focus-within:border-pink-500 focus-within:ring-2 focus-within:ring-pink-100">
-                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
-                    <Mail className="w-4 h-4" />
+        <div className="card shadow-2xl p-10 animate-slide-up">
+          {step === 'email' ? (
+            <form className="space-y-6" onSubmit={handleEmailSubmit}>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-900 ml-1 uppercase tracking-wider">Email Address</label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-brand-600 transition-colors">
+                    <Mail className="w-5 h-5" />
                   </div>
                   <input
-                    id="email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full rounded-xl border-none bg-transparent py-3 pl-11 pr-4 text-gray-900 outline-none"
-                    placeholder="herhealthdataline@gmail.com"
+                    className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border-slate-200 focus:bg-white focus:border-brand-400 focus:ring-4 focus:ring-brand-50"
+                    placeholder="admin@herhealth.org"
+                    required
                   />
                 </div>
               </div>
 
-              {error ? (
-                <div className="rounded-xl bg-red-50 border border-red-200 p-4 text-sm text-red-700 flex items-start gap-2">
-                  <AlertCircle className="w-5 h-5 shrink-0" />
-                  <p>{error}</p>
+              {error && (
+                <div className="bg-red-50 border border-red-100 rounded-xl p-4 flex gap-3 items-start animate-fade-in">
+                  <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
+                  <p className="text-xs font-semibold text-red-800 leading-tight">{error}</p>
                 </div>
-              ) : null}
+              )}
 
               <button
                 type="submit"
                 disabled={isLoading || !email}
-                className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-pink-600 to-purple-600 px-5 py-3 text-white font-semibold transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+                className="w-full btn-primary py-4 text-lg flex items-center justify-center gap-2 group"
               >
                 {isLoading ? 'Verifying...' : 'Continue'}
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
             </form>
-          </>
-        ) : step === 'password' ? (
-          <>
-            <h1 className="text-2xl font-bold text-gray-900 text-center mb-3">
-              Welcome Back
-            </h1>
-            <p className="text-center text-gray-500 mb-6">
-              Enter your password to continue.
-            </p>
+          ) : step === 'password' ? (
+            <form className="space-y-6" onSubmit={handlePasswordLogin}>
+              <div className="flex items-center gap-2 mb-2">
+                <button 
+                  type="button" 
+                  onClick={() => setStep('email')}
+                  className="p-1.5 hover:bg-slate-100 rounded-lg transition-colors"
+                >
+                  <ChevronLeft className="w-5 h-5 text-slate-500" />
+                </button>
+                <span className="text-sm font-bold text-slate-500">{email}</span>
+              </div>
 
-            <form className="space-y-5" onSubmit={handlePasswordLogin}>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="password">
-                  Password
-                </label>
-                <div className="relative rounded-xl border border-gray-200 focus-within:border-pink-500 focus-within:ring-2 focus-within:ring-pink-100">
-                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
-                    <Lock className="w-4 h-4" />
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-900 ml-1 uppercase tracking-wider">Password</label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-brand-600 transition-colors">
+                    <Lock className="w-5 h-5" />
                   </div>
                   <input
-                    id="password"
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full rounded-xl border-none bg-transparent py-3 pl-11 pr-4 text-gray-900 outline-none"
+                    className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border-slate-200 focus:bg-white focus:border-brand-400 focus:ring-4 focus:ring-brand-50"
                     placeholder="Enter your password"
+                    required
                     autoFocus
                   />
                 </div>
               </div>
 
-              {error ? (
-                <div className="rounded-xl bg-red-50 border border-red-200 p-4 text-sm text-red-700 flex items-start gap-2">
-                  <AlertCircle className="w-5 h-5 shrink-0" />
-                  <p>{error}</p>
-                </div>
-              ) : null}
-
-              <div className="flex flex-col gap-3">
-                <button
-                  type="submit"
-                  disabled={isLoading || !password}
-                  className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-pink-600 to-purple-600 px-5 py-3 text-white font-semibold transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {isLoading ? 'Logging in...' : 'Log In'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setStep('email')}
-                  className="w-full py-2 text-sm text-gray-500 hover:text-gray-700 transition"
-                >
-                  Use a different email
-                </button>
-              </div>
-            </form>
-          </>
-        ) : (
-          <>
-            <h1 className="text-2xl font-bold text-gray-900 text-center mb-3">
-              Set Your Password
-            </h1>
-            <p className="text-center text-gray-500 mb-6">
-              Create a secure password for your admin account.
-            </p>
-
-            <form className="space-y-5" onSubmit={handlePasswordSetup}>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="password">
-                  Password
-                </label>
-                <div className="relative rounded-xl border border-gray-200 focus-within:border-pink-500 focus-within:ring-2 focus-within:ring-pink-100">
-                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
-                    <Lock className="w-4 h-4" />
-                  </div>
-                  <input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full rounded-xl border-none bg-transparent py-3 pl-11 pr-4 text-gray-900 outline-none"
-                    placeholder="At least 8 characters"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="confirmPassword">
-                  Confirm Password
-                </label>
-                <div className="relative rounded-xl border border-gray-200 focus-within:border-pink-500 focus-within:ring-2 focus-within:ring-pink-100">
-                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
-                    <Lock className="w-4 h-4" />
-                  </div>
-                  <input
-                    id="confirmPassword"
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full rounded-xl border-none bg-transparent py-3 pl-11 pr-4 text-gray-900 outline-none"
-                    placeholder="Confirm your password"
-                  />
-                </div>
-              </div>
-
-              {/** Password strength indicator **/}
-              {password && (
-                <div className="rounded-xl bg-blue-50 border border-blue-200 p-4 text-sm text-blue-700">
-                  <div className="flex items-center gap-2 mb-2">
-                    <CheckCircle className="w-4 h-4" />
-                    <span className="font-medium">Password requirements:</span>
-                  </div>
-                  <ul className="space-y-1 ml-6">
-                    <li className={password.length >= 8 ? 'text-green-600' : 'text-gray-500'}>
-                      ✓ At least 8 characters
-                    </li>
-                    <li className={password === confirmPassword && confirmPassword ? 'text-green-600' : 'text-gray-500'}>
-                      ✓ Passwords match
-                    </li>
-                  </ul>
+              {error && (
+                <div className="bg-red-50 border border-red-100 rounded-xl p-4 flex gap-3 items-start animate-fade-in">
+                  <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
+                  <p className="text-xs font-semibold text-red-800 leading-tight">{error}</p>
                 </div>
               )}
 
-              {error ? (
-                <div className="rounded-xl bg-red-50 border border-red-200 p-4 text-sm text-red-700 flex items-start gap-2">
-                  <AlertCircle className="w-5 h-5 shrink-0" />
-                  <p>{error}</p>
+              <button
+                type="submit"
+                disabled={isLoading || !password}
+                className="w-full btn-primary py-4 text-lg"
+              >
+                {isLoading ? 'Authenticating...' : 'Sign In'}
+              </button>
+            </form>
+          ) : (
+            <form className="space-y-6" onSubmit={handlePasswordSetup}>
+              <div className="text-center space-y-2 mb-4">
+                <h3 className="text-xl font-bold text-slate-900 tracking-tight">Setup Password</h3>
+                <p className="text-xs text-slate-500 font-medium leading-relaxed">Please create a secure password for your administrator account.</p>
+              </div>
+
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-900 ml-1 uppercase tracking-wider">New Password</label>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full px-4 py-3.5 bg-slate-50 border-slate-200 focus:bg-white focus:border-brand-400 focus:ring-4 focus:ring-brand-50"
+                    placeholder="Min. 8 characters"
+                    required
+                  />
                 </div>
-              ) : null}
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-900 ml-1 uppercase tracking-wider">Confirm Password</label>
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="w-full px-4 py-3.5 bg-slate-50 border-slate-200 focus:bg-white focus:border-brand-400 focus:ring-4 focus:ring-brand-50"
+                    placeholder="Confirm password"
+                    required
+                  />
+                </div>
+              </div>
+
+              {error && (
+                <div className="bg-red-50 border border-red-100 rounded-xl p-4 flex gap-3 items-start animate-fade-in">
+                  <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
+                  <p className="text-xs font-semibold text-red-800 leading-tight">{error}</p>
+                </div>
+              )}
 
               <button
                 type="submit"
                 disabled={isLoading || !password || !confirmPassword}
-                className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-pink-600 to-purple-600 px-5 py-3 text-white font-semibold transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+                className="w-full btn-primary py-4 text-lg"
               >
-                {isLoading ? 'Setting up...' : 'Complete Setup'}
+                {isLoading ? 'Setting up...' : 'Create Admin Account'}
               </button>
             </form>
-          </>
-        )}
+          )}
+        </div>
+
+        <div className="text-center">
+          <Link href="/" className="inline-flex items-center gap-2 text-slate-400 hover:text-brand-600 font-bold text-sm transition-colors">
+            <Heart className="w-4 h-4" />
+            Return to Homepage
+          </Link>
+        </div>
       </div>
     </div>
   );
