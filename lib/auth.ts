@@ -21,8 +21,8 @@ export const getCurrentUser = (): AnonymousUser | null => {
 
     return {
       user_id: session.user_id,
-      age_range: 'unknown',
-      state: 'unknown',
+      age_range: session.age_range || 'unknown',
+      state: session.state || 'unknown',
       created_at: '',
       last_login: '',
       session_hash: session.session_hash,

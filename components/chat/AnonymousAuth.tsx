@@ -73,7 +73,13 @@ export const AnonymousAuth: React.FC<AnonymousAuthProps> = ({
       if (typeof window !== 'undefined') {
         localStorage.setItem(
           'herhealth_session',
-          JSON.stringify({ user_id: data.user_id, session_hash: '', timestamp: Date.now() })
+          JSON.stringify({ 
+            user_id: data.user_id, 
+            session_hash: '', 
+            timestamp: Date.now(),
+            age_range: ageRange,
+            state: state
+          })
         );
       }
       setStep('created');
@@ -125,7 +131,13 @@ export const AnonymousAuth: React.FC<AnonymousAuthProps> = ({
       if (typeof window !== 'undefined') {
         localStorage.setItem(
           'herhealth_session',
-          JSON.stringify({ user_id: signinId.trim().toUpperCase(), session_hash: '', timestamp: Date.now() })
+          JSON.stringify({ 
+            user_id: signinId.trim().toUpperCase(), 
+            session_hash: '', 
+            timestamp: Date.now(),
+            age_range: data.age_range,
+            state: data.state
+          })
         );
       }
       onUserCreated(signinId.trim().toUpperCase());

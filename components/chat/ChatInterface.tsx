@@ -197,14 +197,20 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                 Ask any questions about your health or wellbeing. We're here to provide safe, anonymous guidance.
               </p>
               <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-xl text-left">
-                <div className="bg-white border border-slate-100 p-5 rounded-2xl shadow-sm hover:border-brand-200 transition-all cursor-pointer group">
+                <button 
+                  onClick={() => setInput('I have a question about my personal health and wellness.')}
+                  className="bg-white border border-slate-100 p-5 rounded-2xl shadow-sm hover:border-brand-200 transition-all text-left group"
+                >
                   <h4 className="font-bold text-slate-900 mb-1 group-hover:text-brand-600">Personal Health</h4>
                   <p className="text-sm text-slate-500">Ask about nutrition, fitness, and overall wellness.</p>
-                </div>
-                <div className="bg-white border border-slate-100 p-5 rounded-2xl shadow-sm hover:border-brand-200 transition-all cursor-pointer group">
+                </button>
+                <button 
+                  onClick={() => setInput('Can you give me some guidance on reproductive health topics?')}
+                  className="bg-white border border-slate-100 p-5 rounded-2xl shadow-sm hover:border-brand-200 transition-all text-left group"
+                >
                   <h4 className="font-bold text-slate-900 mb-1 group-hover:text-brand-600">Reproductive Health</h4>
                   <p className="text-sm text-slate-500">Safe guidance on periods, puberty, and rights.</p>
-                </div>
+                </button>
               </div>
             </div>
           ) : (
