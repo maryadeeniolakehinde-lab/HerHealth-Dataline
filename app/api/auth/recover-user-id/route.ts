@@ -1,35 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceRoleClient } from '@/lib/supabase.server';
+import crypto from 'crypto';
 
 export async function POST(request: NextRequest) {
   try {
-    const { state, created_date } = await request.json();
+    const { state, age_range, recovery_question, recovery_answer } = await request.json();
 
-    if (!state || !created_date) {
+    if (!state || !age_range || !recovery_question || !recovery_answer) {
       return NextResponse.json(
-        { error: 'Missing state or created_date' },
+        { error: 'Missing required recovery information' },
         { status: 400 }
       );
     }
 
     const supabase = createServiceRoleClient();
+    const recoveryAnswerHash = crypto
+      .createHash('sha256')
+      .update(recovery_answer.toLowerCase().trim())
+      .digest('hex');
 
-    // Parse the date and create a date range (within 7 days)
-    const searchDate = new Date(created_date);
-    const startDate = new Date(searchDate);
-    startDate.setDate(startDate.getDate() - 3); // 3 days before
-    const endDate = new Date(searchDate);
-    endDate.setDate(endDate.getDate() + 3); // 3 days after
-
-    // Query for users created in that date range with matching state
+    // Query for users with matching state, age range and recovery question
     const { data, error } = await supabase
       .from('users')
-      .select('user_id, created_at')
+      .select('user_id, recovery_answer_hash')
       .eq('state', state)
-      .gte('created_at', startDate.toISOString())
-      .lte('created_at', endDate.toISOString())
-      .order('created_at', { ascending: false })
-      .limit(5); // Limit to prevent too many results
+      .eq('age_range', age_range)
+      .eq('recovery_question', recovery_question);
 
     if (error) {
       console.error('Database error:', error);
@@ -39,8 +35,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Return user IDs (without revealing creation dates for privacy)
-    const userIds = data?.map(user => user.user_id) || [];
+    // Filter by matching recovery answer hash
+    const matchingUsers = data?.filter(user => user.recovery_answer_hash === recoveryAnswerHash) || [];
+    const userIds = matchingUsers.map(user => user.user_id);
 
     return NextResponse.json({
       user_ids: userIds,

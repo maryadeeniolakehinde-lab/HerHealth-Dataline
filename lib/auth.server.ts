@@ -28,13 +28,19 @@ export const createSessionHash = (userID: string): string => {
  */
 export const createAnonymousUser = async (
   ageRange: string,
-  state: string
+  state: string,
+  recoveryQuestion: string,
+  recoveryAnswer: string
 ): Promise<AnonymousUser | null> => {
   const supabase = createServiceRoleClient();
 
   try {
     const userID = generateUserID();
     const sessionHash = createSessionHash(userID);
+    const recoveryAnswerHash = crypto
+      .createHash('sha256')
+      .update(recoveryAnswer.toLowerCase().trim())
+      .digest('hex');
 
     const { data, error } = await supabase
       .from('users')
@@ -43,6 +49,8 @@ export const createAnonymousUser = async (
         age_range: ageRange,
         state: state,
         session_hash: sessionHash,
+        recovery_question: recoveryQuestion,
+        recovery_answer_hash: recoveryAnswerHash,
         created_at: new Date().toISOString(),
         last_login: new Date().toISOString(),
       })

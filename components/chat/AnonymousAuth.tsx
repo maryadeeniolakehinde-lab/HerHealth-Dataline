@@ -15,12 +15,23 @@ export const AnonymousAuth: React.FC<AnonymousAuthProps> = ({
   const [state, setState] = useState('');
   const [showForgotId, setShowForgotId] = useState(false);
   const [recoveryState, setRecoveryState] = useState('');
-  const [recoveryDate, setRecoveryDate] = useState('');
+  const [recoveryAgeRange, setRecoveryAgeRange] = useState('');
+  const [recoveryQuestion, setRecoveryQuestion] = useState('');
+  const [recoveryAnswer, setRecoveryAnswer] = useState('');
   const [userId, setUserId] = useState('');
   const [signinId, setSigninId] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [signinError, setSigninError] = useState('');
   const [foundUserIds, setFoundUserIds] = useState<string[]>([]);
+  const [newRecoveryQuestion, setNewRecoveryQuestion] = useState('');
+  const [newRecoveryAnswer, setNewRecoveryAnswer] = useState('');
+
+  const recoveryQuestions = [
+    'What is your secret health nickname?',
+    'What was the topic of your first health query?',
+    'What is your favorite health-related word?',
+    'What is a secret code only you would know?',
+  ];
 
   const ageRanges = ['13-15', '16-18', '19-25', '26-30', '30+'];
 
@@ -34,8 +45,8 @@ export const AnonymousAuth: React.FC<AnonymousAuthProps> = ({
   ];
 
   const handleCreateNew = async () => {
-    if (!ageRange || !state) {
-      alert('Please select both age range and state');
+    if (!ageRange || !state || !newRecoveryQuestion || !newRecoveryAnswer) {
+      alert('Please fill in all fields, including the recovery question');
       return;
     }
 
@@ -45,7 +56,12 @@ export const AnonymousAuth: React.FC<AnonymousAuthProps> = ({
       const response = await fetch('/api/auth/create-user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ageRange, state }),
+        body: JSON.stringify({
+          ageRange,
+          state,
+          recoveryQuestion: newRecoveryQuestion,
+          recoveryAnswer: newRecoveryAnswer,
+        }),
       });
 
       const data = await response.json();
@@ -125,8 +141,8 @@ export const AnonymousAuth: React.FC<AnonymousAuthProps> = ({
   };
 
   const handleForgotUserId = async () => {
-    if (!recoveryState || !recoveryDate) {
-      alert('Please provide both your state and approximate creation date');
+    if (!recoveryState || !recoveryAgeRange || !recoveryQuestion || !recoveryAnswer) {
+      alert('Please fill in all recovery fields');
       return;
     }
 
@@ -137,7 +153,12 @@ export const AnonymousAuth: React.FC<AnonymousAuthProps> = ({
       const response = await fetch('/api/auth/recover-user-id', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ state: recoveryState, created_date: recoveryDate }),
+        body: JSON.stringify({
+          state: recoveryState,
+          age_range: recoveryAgeRange,
+          recovery_question: recoveryQuestion,
+          recovery_answer: recoveryAnswer,
+        }),
       });
 
       const data = await response.json();
@@ -149,7 +170,7 @@ export const AnonymousAuth: React.FC<AnonymousAuthProps> = ({
       if (data.user_ids && data.user_ids.length > 0) {
         setFoundUserIds(data.user_ids);
       } else {
-        alert('No user IDs found matching those details. You may need to create a new account.');
+        alert('No user IDs found matching those details. Please check your recovery information.');
       }
     } catch (error) {
       console.error('Error:', error);
@@ -313,18 +334,51 @@ export const AnonymousAuth: React.FC<AnonymousAuthProps> = ({
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Approximate Creation Date
+                    Your Age Range
+                  </label>
+                  <select
+                    value={recoveryAgeRange}
+                    onChange={(e) => setRecoveryAgeRange(e.target.value)}
+                    className="w-full rounded-xl border border-gray-200 px-4 py-3 text-gray-900 focus:border-pink-500 focus:ring-2 focus:ring-pink-100"
+                  >
+                    <option value="">Select your age range</option>
+                    {ageRanges.map((range) => (
+                      <option key={range} value={range}>
+                        {range}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Security Question
+                  </label>
+                  <select
+                    value={recoveryQuestion}
+                    onChange={(e) => setRecoveryQuestion(e.target.value)}
+                    className="w-full rounded-xl border border-gray-200 px-4 py-3 text-gray-900 focus:border-pink-500 focus:ring-2 focus:ring-pink-100"
+                  >
+                    <option value="">Select your security question</option>
+                    {recoveryQuestions.map((q) => (
+                      <option key={q} value={q}>
+                        {q}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Security Answer
                   </label>
                   <input
-                    type="date"
-                    value={recoveryDate}
-                    onChange={(e) => setRecoveryDate(e.target.value)}
+                    type="text"
+                    value={recoveryAnswer}
+                    onChange={(e) => setRecoveryAnswer(e.target.value)}
+                    placeholder="Enter your secret answer"
                     className="w-full rounded-xl border border-gray-200 px-4 py-3 text-gray-900 focus:border-pink-500 focus:ring-2 focus:ring-pink-100"
-                    max={new Date().toISOString().split('T')[0]}
                   />
-                  <p className="text-xs text-gray-500 mt-1">
-                    We'll search within 3 days of this date
-                  </p>
                 </div>
               </>
             )}
@@ -334,10 +388,10 @@ export const AnonymousAuth: React.FC<AnonymousAuthProps> = ({
             {!foundUserIds.length && (
               <button
                 onClick={handleForgotUserId}
-                disabled={isLoading || !recoveryState || !recoveryDate}
+                disabled={isLoading || !recoveryState || !recoveryAgeRange || !recoveryQuestion || !recoveryAnswer}
                 className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isLoading ? 'Searching...' : 'Find My User ID'}
+                {isLoading ? 'Verifying...' : 'Find My User ID'}
               </button>
             )}
 
@@ -494,6 +548,39 @@ export const AnonymousAuth: React.FC<AnonymousAuthProps> = ({
               </select>
             </div>
 
+            {/* Security Question */}
+            <div className="pt-4 border-t border-gray-100">
+              <label className="block text-sm font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                <Lock className="w-4 h-4 text-pink-500" />
+                Security Recovery
+              </label>
+              <div className="space-y-3">
+                <select
+                  value={newRecoveryQuestion}
+                  onChange={(e) => setNewRecoveryQuestion(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-200 text-sm"
+                >
+                  <option value="">Pick a security question...</option>
+                  {recoveryQuestions.map((q) => (
+                    <option key={q} value={q}>
+                      {q}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="text"
+                  value={newRecoveryAnswer}
+                  onChange={(e) => setNewRecoveryAnswer(e.target.value)}
+                  placeholder="Your secret answer..."
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-200 text-sm"
+                />
+                <p className="text-[10px] text-gray-500 leading-tight">
+                  This is the only way to recover your account if you lose your ID. 
+                  Choose something only you know.
+                </p>
+              </div>
+            </div>
+
             {/* Info */}
             <p className="text-xs text-gray-500 mt-4">
               We only use this to tailor health information to your location and
@@ -511,7 +598,7 @@ export const AnonymousAuth: React.FC<AnonymousAuthProps> = ({
             </button>
             <button
               onClick={handleCreateNew}
-              disabled={!ageRange || !state || isLoading}
+              disabled={!ageRange || !state || !newRecoveryQuestion || !newRecoveryAnswer || isLoading}
               className="flex-1 bg-pink-500 hover:bg-pink-600 disabled:bg-gray-400 text-white font-bold py-2 px-4 rounded-lg transition-colors disabled:cursor-not-allowed"
             >
               {isLoading ? 'Creating...' : 'Create Account'}

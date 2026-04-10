@@ -3,7 +3,7 @@ import { createAnonymousUser, verifyReturningUser } from '@/lib/auth.server';
 
 export async function POST(request: NextRequest) {
   try {
-    const { ageRange, state, userId } = await request.json();
+    const { ageRange, state, userId, recoveryQuestion, recoveryAnswer } = await request.json();
 
     // If userId provided, it's a returning user
     if (userId) {
@@ -12,14 +12,14 @@ export async function POST(request: NextRequest) {
     }
 
     // New user
-    if (!ageRange || !state) {
+    if (!ageRange || !state || !recoveryQuestion || !recoveryAnswer) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
       );
     }
 
-    const user = await createAnonymousUser(ageRange, state);
+    const user = await createAnonymousUser(ageRange, state, recoveryQuestion, recoveryAnswer);
     if (!user) {
       throw new Error('Failed to create user');
     }

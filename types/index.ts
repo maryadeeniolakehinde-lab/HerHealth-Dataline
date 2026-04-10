@@ -6,6 +6,8 @@ export interface AnonymousUser {
   created_at: string;
   last_login: string;
   session_hash: string; // For returning user verification
+  recovery_question?: string;
+  recovery_answer_hash?: string;
 }
 
 export interface ChatMessage {
