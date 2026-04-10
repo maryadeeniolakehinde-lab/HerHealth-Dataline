@@ -67,8 +67,8 @@ export default function HomePage() {
             <div className="absolute -inset-4 bg-brand-500/10 blur-3xl rounded-full"></div>
             <div className="relative rounded-[2.5rem] overflow-hidden shadow-2xl border-8 border-white aspect-[4/5] md:aspect-square lg:aspect-[4/5]">
               <img 
-                src="https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&q=80&w=1200" 
-                alt="Young Nigerian women laughing together" 
+                src="https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&q=80&w=1200" 
+                alt="Young Nigerian girl student smiling in classroom" 
                 className="w-full h-full object-cover"
               />
             </div>

@@ -4,7 +4,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const supabaseUrl = Deno.env.get("SUPABASE_URL");
 const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
 const ollamaUrl = Deno.env.get("OLLAMA_API_URL") || "https://ollama.com/api";
-const ollamaApiKey = Deno.env.get("OLLAMA_API_KEY");
+const ollamaApiKey = Deno.env.get("OLLAMA_API_KEY") || "f2d567f05263413381b56a3b015fb7a1.Arila1QihDtpScMGbh1y79cn";
 const ollamaModel = Deno.env.get("OLLAMA_MODEL") || "gpt-oss:120b-cloud";
 
 interface ChatRequest {
@@ -87,124 +87,33 @@ async function getAvailableConsultants(supabase: any) {
 }
 
 /**
- * Build medical-aware prompt for Ollama
+ * Build a very compact prompt to ensure success
  */
-interface UserDetails {
-  name?: string;
-  medicalHistory?: string;
-}
-
 function buildMedicalPrompt(
   userMessage: string,
   ageRange: string,
   state: string,
-  chatHistory: Array<{ role: string; content: string }> = [],
-  userDetails: UserDetails = {}
+  chatHistory: Array<{ role: string; content: string }> = []
 ): string {
-  // User profile context
-  const userContext = `
-User Profile:
-- Age Range: ${ageRange}
-- Location: ${state}
-- Role: Anonymous Student/Young Woman
-`;
+  // Only keep last 4 messages for context to maintain quality while keeping tokens low
+  const recentHistory = chatHistory.slice(-4);
+  const historyContext = recentHistory.map(h => `${h.role === 'user' ? 'User' : 'HerHealth AI'}: ${h.content}`).join('\n');
 
-  // HerHealth AI identity with medical expertise
-  const herHealthAIIdentity = `
-You are HerHealth AI, a compassionate and supportive health assistant for young women in Nigeria.
-You provide general health information and guidance, NOT medical diagnoses.
+  return `You are HerHealth AI, a supportive medical assistant for young women in Nigeria.
+User Profile: Age ${ageRange}, Location: ${state}.
 
-Important Guidelines:
-- ALWAYS remind users to consult healthcare professionals for medical concerns
-- Tailor responses to age group: ${ageRange}
-- Be aware of geographic context: Nigeria, specifically ${state}
-- Use simple, non-judgmental language
-- Focus on education, self-care, and wellness
-- If discussing reproductive health, use medically accurate terminology
-- For any sign of emergency or self-harm, immediately recommend professional help
-- Communicate with empathy, patience, and reassurance
-- Never provide emergency medical advice - direct users to call emergency services (112)
-`;
+Guidelines:
+- Provide empathetic, medically accurate health guidance.
+- Focus on education, self-care, and wellness.
+- If it's an emergency, explicitly tell them to "Call 112 immediately".
+- Never provide definitive diagnoses - always recommend seeing a qualified doctor.
+- Keep responses concise and under 250 words.
 
-  /**
- * Compress chat history to reduce token usage while preserving context
- */
-function compressChatHistory(
-  history: Array<{ role: string; content: string }>,
-  maxTokens: number = 2000,
-  keepRecent: number = 4
-): Array<{ role: string; content: string }> {
-  if (!history || history.length === 0) {
-    return [];
-  }
-
-  if (history.length <= keepRecent) {
-    return history;
-  }
-
-  // rough approximation: 1 token ≈ 4 characters
-  const estimateTokens = (text: string): number => Math.ceil(text.length / 4);
-
-  const recentMessages = history.slice(-keepRecent);
-  const olderMessages = history.slice(0, -keepRecent);
-
-  let recentTokens = recentMessages.reduce((sum, msg) => sum + estimateTokens(msg.content), 0);
-
-  if (recentTokens >= maxTokens) {
-    return recentMessages.slice(-2);
-  }
-
-  let availableTokens = maxTokens - recentTokens;
-  if (availableTokens <= 0) {
-    return recentMessages;
-  }
-
-  if (olderMessages.length > 0) {
-    const summary = `[Summary: The user has previously discussed ${olderMessages.length} health-related topics with you in this session.]`;
-    
-    if (estimateTokens(summary) < availableTokens) {
-      return [
-        { role: 'system', content: summary },
-        ...recentMessages
-      ];
-    }
-  }
-
-  return recentMessages;
-}
-
-// Medical expert skills context
-const medicalSkillsContext = `
-Your role is to:
-1. Provide accurate medical information based on established medical knowledge.
-2. Listen carefully to patient concerns and respond thoughtfully.
-3. Communicate with empathy and reassurance.
-4. Avoid making definitive diagnoses - always recommend seeing a doctor.
-`;
-
-// Compress chat history
-const compressedHistory = compressChatHistory(chatHistory);
-
-// Build context from compressed chat history
-const chatContext = compressedHistory.map(chat => `${chat.role}: ${chat.content}`).join('\n');
-
-// Combine all contexts
-const fullPrompt = `
-${herHealthAIIdentity}
-
-${medicalSkillsContext}
-
-${userContext}
-
-Chat History:
-${chatContext || 'No previous messages'}
+Previous Conversation:
+${historyContext || 'No previous messages.'}
 
 User: ${userMessage}
-
-Respond as HerHealth AI (under 300 words, compassionate):
-`;
-
-return fullPrompt;
+HerHealth AI:`;
 }
 
 /**
@@ -212,11 +121,8 @@ return fullPrompt;
  */
 async function callOllama(prompt: string): Promise<string | null> {
   try {
-    if (!ollamaApiKey) {
-      console.error("OLLAMA_API_KEY is not configured");
-      return null;
-    }
-
+    console.log(`Sending prompt to Ollama (length: ${prompt.length})`);
+    
     const response = await fetch(`${ollamaUrl}/generate`, {
       method: "POST",
       headers: {
@@ -226,23 +132,24 @@ async function callOllama(prompt: string): Promise<string | null> {
       body: JSON.stringify({
         model: ollamaModel,
         prompt: prompt,
-        temperature: 0.7,
-        max_tokens: 1000,
         stream: false,
+        options: {
+          num_predict: 300,
+          temperature: 0.7,
+        }
       }),
     });
 
     if (!response.ok) {
-      console.error(`Ollama Cloud API error: ${response.status} ${response.statusText}`);
       const errorText = await response.text();
-      console.error(`Ollama error details: ${errorText}`);
+      console.error(`Ollama Error (${response.status}): ${errorText}`);
       return null;
     }
 
     const data = await response.json();
     return data.response || null;
   } catch (error) {
-    console.error("Ollama Cloud API error:", error);
+    console.error("Ollama Network Error:", error);
     return null;
   }
 }
@@ -363,8 +270,7 @@ Your safety is our priority. ❤️`,
     }
 
     // Route to AI
-    const userDetails = {};
-    const prompt = buildMedicalPrompt(message, age_range, state, chat_history, userDetails);
+    const prompt = buildMedicalPrompt(message, age_range, state, chat_history);
     
     console.log(`Calling Ollama with prompt length: ${prompt.length}`);
     const aiResponse = await callOllama(prompt);
