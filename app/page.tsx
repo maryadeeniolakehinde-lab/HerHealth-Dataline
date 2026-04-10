@@ -67,8 +67,8 @@ export default function HomePage() {
             <div className="absolute -inset-4 bg-brand-500/10 blur-3xl rounded-full"></div>
             <div className="relative rounded-[2.5rem] overflow-hidden shadow-2xl border-8 border-white aspect-[4/5] md:aspect-square lg:aspect-[4/5]">
               <img 
-                src="https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&q=80&w=1200" 
-                alt="Young Nigerian girl student smiling in classroom" 
+                src="https://images.unsplash.com/photo-1531123897727-8f129e16fd3c?auto=format&fit=crop&q=80&w=1200" 
+                alt="Portrait of a young Nigerian woman" 
                 className="w-full h-full object-cover"
               />
             </div>
@@ -126,7 +126,7 @@ export default function HomePage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-4">
                 <div className="rounded-3xl overflow-hidden h-64">
-                  <img src="https://images.unsplash.com/photo-1523450031318-038072044813?auto=format&fit=crop&q=80&w=400" alt="Nigerian students studying" className="w-full h-full object-cover" />
+                  <img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&q=80&w=400" alt="Nigerian students studying" className="w-full h-full object-cover" />
                 </div>
                 <div className="rounded-3xl overflow-hidden h-48">
                   <img src="https://images.unsplash.com/photo-1531123414780-f74242c2b052?auto=format&fit=crop&q=80&w=400" alt="Nigerian health professional" className="w-full h-full object-cover" />

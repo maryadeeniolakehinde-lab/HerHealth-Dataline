@@ -233,7 +233,7 @@ export const AnonymousAuth: React.FC<AnonymousAuthProps> = ({
         {/* Left Side: Image & Content */}
         <div className="md:w-1/2 relative overflow-hidden hidden md:block">
           <img 
-            src="https://images.unsplash.com/photo-1542810634-71277d95dcbb?auto=format&fit=crop&q=80&w=1200" 
+            src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&q=80&w=1200" 
             alt="Supportive community of Nigerian students" 
             className="absolute inset-0 w-full h-full object-cover"
           />
