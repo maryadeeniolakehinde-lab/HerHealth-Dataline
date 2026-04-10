@@ -324,21 +324,26 @@ Your safety is our priority. ❤️`,
     // Route to AI
     const userDetails = {};
     const prompt = buildMedicalPrompt(message, age_range, state, chat_history, userDetails);
+    
+    console.log(`Calling Ollama with prompt length: ${prompt.length}`);
     const aiResponse = await callOllama(prompt);
 
     if (!aiResponse) {
+      console.error("AI Response generation failed (Ollama returned null)");
       // Fallback response if Ollama unavailable
       const fallbackResponse: ChatResponse = {
         is_emergency: false,
         routed_to: "ai",
         message:
-          "HerHealth AI is temporarily under maintenance. Please try again in a few moments. A live consultant may be available - please check back soon.",
+          "I'm sorry, I'm having trouble connecting to my knowledge base right now. Please try again in a few moments, or check if a live consultant is available.",
       };
 
       return new Response(JSON.stringify(fallbackResponse), {
         headers: { "Content-Type": "application/json" },
       });
     }
+
+    console.log(`AI Response generated successfully: ${aiResponse.substring(0, 50)}...`);
 
     // Save AI response
     await saveMessage(supabase, user_id, aiResponse, "ai");
