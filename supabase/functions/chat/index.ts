@@ -4,7 +4,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const supabaseUrl = Deno.env.get("SUPABASE_URL");
 const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
 const ollamaUrl = Deno.env.get("OLLAMA_API_URL") || "https://ollama.com/api";
-const ollamaApiKey = Deno.env.get("OLLAMA_API_KEY") || "f2d567f05263413381b56a3b015fb7a1.Arila1QihDtpScMGbh1y79cn";
+const ollamaApiKey = Deno.env.get("OLLAMA_API_KEY");
 const ollamaModel = Deno.env.get("OLLAMA_MODEL") || "gpt-oss:120b-cloud";
 
 interface ChatRequest {
@@ -376,11 +376,14 @@ Your safety is our priority. ❤️`,
         is_emergency: false,
         routed_to: "ai",
         message:
-          "I'm sorry, I'm having trouble connecting to my knowledge base right now. Please try again in a few moments, or check if a live consultant is available.",
+          "I'm sorry, I'm having trouble connecting to my knowledge base right now. This can happen if the AI service is overloaded. Please try again in a few moments, or check if a live consultant is available.",
       };
 
       return new Response(JSON.stringify(fallbackResponse), {
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
       });
     }
 
@@ -399,7 +402,10 @@ Your safety is our priority. ❤️`,
     };
 
     return new Response(JSON.stringify(response), {
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
     });
   } catch (error) {
     console.error("Handler error:", error);

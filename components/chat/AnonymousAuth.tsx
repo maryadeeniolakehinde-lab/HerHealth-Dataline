@@ -195,14 +195,46 @@ export const AnonymousAuth: React.FC<AnonymousAuthProps> = ({
     onUserCreated(userId);
   };
 
+  const copyToClipboard = async (text: string) => {
+    try {
+      if (typeof navigator !== 'undefined' && navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        alert('ID copied to clipboard!');
+        return;
+      }
+
+      // Fallback for non-secure contexts
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-9999px';
+      textArea.style.top = '0';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      
+      const successful = document.execCommand('copy');
+      document.body.removeChild(textArea);
+      
+      if (successful) {
+        alert('ID copied to clipboard!');
+      } else {
+        throw new Error('Fallback copy failed');
+      }
+    } catch (err) {
+      console.error('Copy failed:', err);
+      alert('Could not copy ID automatically. Please select the ID and copy it manually.');
+    }
+  };
+
   if (step === 'welcome') {
     return (
       <div className="min-h-screen bg-white flex flex-col md:flex-row">
         {/* Left Side: Image & Content */}
         <div className="md:w-1/2 relative overflow-hidden hidden md:block">
           <img 
-            src="https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&q=80&w=1200" 
-            alt="Supportive community" 
+            src="https://images.unsplash.com/photo-1542810634-71277d95dcbb?auto=format&fit=crop&q=80&w=1200" 
+            alt="Supportive community of Nigerian students" 
             className="absolute inset-0 w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent flex flex-col justify-end p-12 text-white">
@@ -556,12 +588,7 @@ export const AnonymousAuth: React.FC<AnonymousAuthProps> = ({
           <div className="absolute inset-0 bg-brand-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
           <p className="text-4xl font-display font-extrabold text-brand-600 font-mono tracking-widest">{userId}</p>
           <button
-            onClick={() => {
-              if (typeof navigator !== 'undefined' && navigator.clipboard) {
-                navigator.clipboard.writeText(userId);
-                alert('ID copied to clipboard!');
-              }
-            }}
+            onClick={() => copyToClipboard(userId)}
             className="mt-4 text-xs font-bold text-brand-700 uppercase tracking-widest hover:text-brand-900 transition-colors underline underline-offset-4"
           >
             Copy ID

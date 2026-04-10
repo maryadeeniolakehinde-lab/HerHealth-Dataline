@@ -67,8 +67,8 @@ export default function HomePage() {
             <div className="absolute -inset-4 bg-brand-500/10 blur-3xl rounded-full"></div>
             <div className="relative rounded-[2.5rem] overflow-hidden shadow-2xl border-8 border-white aspect-[4/5] md:aspect-square lg:aspect-[4/5]">
               <img 
-                src="https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&q=80&w=800" 
-                alt="Young Nigerian woman smiling" 
+                src="https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&q=80&w=1200" 
+                alt="Young Nigerian women laughing together" 
                 className="w-full h-full object-cover"
               />
             </div>
@@ -126,18 +126,18 @@ export default function HomePage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-4">
                 <div className="rounded-3xl overflow-hidden h-64">
-                  <img src="https://images.unsplash.com/photo-1529139513477-3235a1461ec4?auto=format&fit=crop&q=80&w=400" alt="Student" className="w-full h-full object-cover" />
+                  <img src="https://images.unsplash.com/photo-1523450031318-038072044813?auto=format&fit=crop&q=80&w=400" alt="Nigerian students studying" className="w-full h-full object-cover" />
                 </div>
                 <div className="rounded-3xl overflow-hidden h-48">
-                  <img src="https://images.unsplash.com/photo-1531123414780-f74242c2b052?auto=format&fit=crop&q=80&w=400" alt="Health Professional" className="w-full h-full object-cover" />
+                  <img src="https://images.unsplash.com/photo-1531123414780-f74242c2b052?auto=format&fit=crop&q=80&w=400" alt="Nigerian health professional" className="w-full h-full object-cover" />
                 </div>
               </div>
               <div className="space-y-4 pt-12">
                 <div className="rounded-3xl overflow-hidden h-48">
-                  <img src="https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&q=80&w=400" alt="Friendship" className="w-full h-full object-cover" />
+                  <img src="https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&q=80&w=400" alt="Nigerian friends" className="w-full h-full object-cover" />
                 </div>
                 <div className="rounded-3xl overflow-hidden h-64">
-                  <img src="https://images.unsplash.com/photo-1523450031318-038072044813?auto=format&fit=crop&q=80&w=400" alt="Learning" className="w-full h-full object-cover" />
+                  <img src="https://images.unsplash.com/photo-1529139513477-3235a1461ec4?auto=format&fit=crop&q=80&w=400" alt="Young Nigerian student" className="w-full h-full object-cover" />
                 </div>
               </div>
             </div>
@@ -211,9 +211,8 @@ export default function HomePage() {
             </ul>
           </div>
           <div>
-            <h5 className="font-bold text-white mb-6">Admin</h5>
+            <h5 className="font-bold text-white mb-6">Support</h5>
             <ul className="space-y-4 text-sm">
-              <li><Link href="/admin" className="hover:text-brand-400 transition-colors">Admin Login</Link></li>
               <li><Link href="/consultant/login" className="hover:text-brand-400 transition-colors">Consultant Portal</Link></li>
             </ul>
           </div>
