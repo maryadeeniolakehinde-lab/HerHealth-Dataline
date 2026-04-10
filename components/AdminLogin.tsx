@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Shield, Mail, Lock, AlertCircle } from 'lucide-react';
+import { Shield, Mail, Lock, AlertCircle, CheckCircle } from 'lucide-react';
 import { setAdminSession } from '@/lib/adminAuth';
 
 interface AdminLoginProps {
@@ -9,12 +9,15 @@ interface AdminLoginProps {
 }
 
 export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess }) => {
-  const [email, setEmail] = useState('admin@herhealth.org');
+  const [step, setStep] = useState<'email' | 'password-setup'>('email');
+  const [email, setEmail] = useState('herhealthdataline@gmail.com');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [adminToken, setAdminToken] = useState('');
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleEmailSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError('');
     setIsLoading(true);
@@ -25,24 +28,65 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess }) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email }),
       });
 
       const data = await response.json();
       if (!response.ok || data.error) {
-        setError(data.error || 'Invalid email or password');
+        setError(data.error || 'Unable to verify email');
         return;
       }
 
-      setAdminSession(email, data.token);
+      setAdminToken(data.token);
+      setStep('password-setup');
+    } catch (err) {
+      setError('Unable to verify email. Please try again.');
+      console.error('Admin login error:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handlePasswordSetup = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError('');
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('/api/admin/set-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        setError(data.error || 'Failed to set password');
+        return;
+      }
+
+      setAdminSession(email, adminToken);
       if (onLoginSuccess) {
         onLoginSuccess();
       } else {
         window.location.href = '/admin';
       }
     } catch (err) {
-      setError('Unable to sign in. Please try again.');
-      console.error('Admin login error:', err);
+      setError('Unable to set password. Please try again.');
+      console.error('Password setup error:', err);
     } finally {
       setIsLoading(false);
     }
@@ -56,67 +100,135 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess }) => {
             <Shield className="w-8 h-8" />
           </div>
         </div>
-        <h1 className="text-2xl font-bold text-gray-900 text-center mb-3">Admin Sign In</h1>
-        <p className="text-center text-gray-500 mb-6">
-          Secure access for NGO admins to review anonymized health insights.
-        </p>
-        <form className="space-y-5" onSubmit={handleSubmit}>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="email">
-              Email address
-            </label>
-            <div className="relative rounded-xl border border-gray-200 focus-within:border-pink-500 focus-within:ring-2 focus-within:ring-pink-100">
-              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
-                <Mail className="w-4 h-4" />
+
+        {step === 'email' ? (
+          <>
+            <h1 className="text-2xl font-bold text-gray-900 text-center mb-3">
+              Admin Access
+            </h1>
+            <p className="text-center text-gray-500 mb-6">
+              Enter your email to access the admin dashboard.
+            </p>
+
+            <form className="space-y-5" onSubmit={handleEmailSubmit}>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="email">
+                  Email address
+                </label>
+                <div className="relative rounded-xl border border-gray-200 focus-within:border-pink-500 focus-within:ring-2 focus-within:ring-pink-100">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
+                    <Mail className="w-4 h-4" />
+                  </div>
+                  <input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full rounded-xl border-none bg-transparent py-3 pl-11 pr-4 text-gray-900 outline-none"
+                    placeholder="herhealthdataline@gmail.com"
+                  />
+                </div>
               </div>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-xl border-none bg-transparent py-3 pl-11 pr-4 text-gray-900 outline-none"
-                placeholder="admin@herhealth.org"
-              />
-            </div>
-          </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="password">
-              Password
-            </label>
-            <div className="relative rounded-xl border border-gray-200 focus-within:border-pink-500 focus-within:ring-2 focus-within:ring-pink-100">
-              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
-                <Lock className="w-4 h-4" />
+              {error ? (
+                <div className="rounded-xl bg-red-50 border border-red-200 p-4 text-sm text-red-700 flex items-start gap-2">
+                  <AlertCircle className="w-5 h-5 shrink-0" />
+                  <p>{error}</p>
+                </div>
+              ) : null}
+
+              <button
+                type="submit"
+                disabled={isLoading || !email}
+                className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-pink-600 to-purple-600 px-5 py-3 text-white font-semibold transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isLoading ? 'Verifying...' : 'Continue'}
+              </button>
+            </form>
+          </>
+        ) : (
+          <>
+            <h1 className="text-2xl font-bold text-gray-900 text-center mb-3">
+              Set Your Password
+            </h1>
+            <p className="text-center text-gray-500 mb-6">
+              Create a secure password for your admin account.
+            </p>
+
+            <form className="space-y-5" onSubmit={handlePasswordSetup}>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="password">
+                  Password
+                </label>
+                <div className="relative rounded-xl border border-gray-200 focus-within:border-pink-500 focus-within:ring-2 focus-within:ring-pink-100">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
+                    <Lock className="w-4 h-4" />
+                  </div>
+                  <input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full rounded-xl border-none bg-transparent py-3 pl-11 pr-4 text-gray-900 outline-none"
+                    placeholder="At least 8 characters"
+                  />
+                </div>
               </div>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-xl border-none bg-transparent py-3 pl-11 pr-4 text-gray-900 outline-none"
-                placeholder="Enter your password"
-              />
-            </div>
-          </div>
 
-          {error ? (
-            <div className="rounded-xl bg-red-50 border border-red-200 p-4 text-sm text-red-700 flex items-start gap-2">
-              <AlertCircle className="w-5 h-5 shrink-0" />
-              <p>{error}</p>
-            </div>
-          ) : null}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="confirmPassword">
+                  Confirm Password
+                </label>
+                <div className="relative rounded-xl border border-gray-200 focus-within:border-pink-500 focus-within:ring-2 focus-within:ring-pink-100">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
+                    <Lock className="w-4 h-4" />
+                  </div>
+                  <input
+                    id="confirmPassword"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="w-full rounded-xl border-none bg-transparent py-3 pl-11 pr-4 text-gray-900 outline-none"
+                    placeholder="Confirm your password"
+                  />
+                </div>
+              </div>
 
-          <button
-            type="submit"
-            disabled={isLoading || !email || !password}
-            className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-pink-600 to-purple-600 px-5 py-3 text-white font-semibold transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {isLoading ? 'Signing in...' : 'Sign In'}
-          </button>
-        </form>
-        <p className="mt-6 text-sm text-gray-500 text-center">
-          If you need help, contact <strong>admin@herhealth.org</strong>
-        </p>
+              {/** Password strength indicator **/}
+              {password && (
+                <div className="rounded-xl bg-blue-50 border border-blue-200 p-4 text-sm text-blue-700">
+                  <div className="flex items-center gap-2 mb-2">
+                    <CheckCircle className="w-4 h-4" />
+                    <span className="font-medium">Password requirements:</span>
+                  </div>
+                  <ul className="space-y-1 ml-6">
+                    <li className={password.length >= 8 ? 'text-green-600' : 'text-gray-500'}>
+                      ✓ At least 8 characters
+                    </li>
+                    <li className={password === confirmPassword && confirmPassword ? 'text-green-600' : 'text-gray-500'}>
+                      ✓ Passwords match
+                    </li>
+                  </ul>
+                </div>
+              )}
+
+              {error ? (
+                <div className="rounded-xl bg-red-50 border border-red-200 p-4 text-sm text-red-700 flex items-start gap-2">
+                  <AlertCircle className="w-5 h-5 shrink-0" />
+                  <p>{error}</p>
+                </div>
+              ) : null}
+
+              <button
+                type="submit"
+                disabled={isLoading || !password || !confirmPassword}
+                className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-pink-600 to-purple-600 px-5 py-3 text-white font-semibold transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isLoading ? 'Setting up...' : 'Complete Setup'}
+              </button>
+            </form>
+          </>
+        )}
       </div>
     </div>
   );

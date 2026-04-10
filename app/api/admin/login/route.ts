@@ -1,22 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@herhealth.org';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'HerHealth@123';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'herhealthdataline@gmail.com';
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await request.json();
+    const { email } = await request.json();
 
-    if (!email || !password) {
+    if (!email) {
       return NextResponse.json(
-        { error: 'Missing email or password' },
+        { error: 'Missing email' },
         { status: 400 }
       );
     }
 
-    if (email !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
+    if (email !== ADMIN_EMAIL) {
       return NextResponse.json(
-        { error: 'Invalid email or password' },
+        { error: 'Invalid email. Admin access denied.' },
         { status: 401 }
       );
     }
@@ -26,6 +25,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       token,
       email,
+      requiresPasswordSetup: true,
     });
   } catch (error) {
     console.error('Admin login error:', error);
