@@ -239,15 +239,14 @@ serve(async (req: Request) => {
         emergency_message: `🚨 URGENT: This sounds like a severe medical emergency involving ${emergencyCheck.keyword}. 
         
 Please take immediate action:
-- Call your local emergency number (911 in the US)
+- Call your local emergency number (112 in Nigeria)
 - Visit the nearest hospital or emergency clinic
 - If safe, tell a trusted adult immediately
 
 HerHealth AI cannot provide emergency medical care. Professional medical attention is critical.
 
 If you're having thoughts of self-harm or suicide, please reach out:
-- National Suicide Prevention Lifeline: 988 (US)
-- Crisis Text Line: Text HOME to 741741
+- Local mental health support: +2348167068027
 - International Association for Suicide Prevention: https://www.iasp.info/resources/Crisis_Centres/
 
 Your safety is our priority. ❤️`,

@@ -34,8 +34,8 @@ HerHealth Dataline is a comprehensive, anonymous health and wellness platform sp
 ### 3. **Emergency Response System**
 - Keyword detection for critical health issues
 - Immediate emergency alerts with resources
-- Crisis hotline information (988, Crisis Text Line)
-- Directed users to emergency services
+- Crisis hotline information (+2348167068027)
+- Directed users to Nigerian emergency services
 
 ### 4. **Knowledge Hub**
 - 4 content categories:
@@ -334,11 +334,9 @@ docker run -p 3000:3000 herhealth
 
 If you're in crisis:
 
-🚨 **Call Emergency Services**: 911 (US)
+🚨 **Call Emergency Services**: 112 (Nigeria)
 
-💬 **National Suicide Prevention Lifeline**: 988
-
-💬 **Crisis Text Line**: Text HOME to 741741
+💬 **Local mental health support**: +2348167068027
 
 📞 **International Suicide Hotlines**: https://www.iasp.info/resources/Crisis_Centres/
 

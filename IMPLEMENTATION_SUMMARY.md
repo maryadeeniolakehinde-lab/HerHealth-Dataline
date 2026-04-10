@@ -83,7 +83,7 @@ I have successfully built a **comprehensive, production-ready full-stack web app
 ### ✅ **8. Disclaimer & Privacy System**
 - **Mandatory Acceptance** - Before accessing chat
 - **Clear Medical Disclaimers** - Generic guidance, not diagnosis
-- **Emergency Resources** - 988, Crisis Text Line, etc.
+- **Emergency Resources** - Local crisis support and +2348167068027
 - **Privacy Policy** - No PII collection, data use explained
 - Files: `components/chat/DisclaimerComponent.tsx`
 
@@ -203,7 +203,7 @@ HerHealth Dataline/
 - 16 emergency keywords with severity levels
 - Critical: suicide, self-harm, rape, etc.
 - Immediate alert with resources
-- Hotline numbers (988, Crisis Text Line)
+- Hotline numbers (+2348167068027)
 
 ### **AI Chat System** ✅
 - Real-time messaging interface
@@ -430,8 +430,8 @@ This entire application is **production-ready**. You can:
 
 ## 📞 Support & Resources
 
-- **Emergency**: 988 (US Suicide Prevention Lifeline)
-- **Crisis**: Text HOME to 741741
+- **Emergency**: Call 112 in Nigeria
+- **Crisis**: +2348167068027
 - **International**: https://www.iasp.info/resources/Crisis_Centres/
 
 ---

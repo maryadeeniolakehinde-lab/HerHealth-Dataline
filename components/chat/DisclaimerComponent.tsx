@@ -107,9 +107,9 @@ export const DisclaimerComponent: React.FC<DisclaimerProps> = ({
                     emergency:
                   </p>
                   <ul className="text-sm text-purple-800 space-y-1">
-                    <li>🚨 Call emergency services (911 in US)</li>
-                    <li>💬 National Suicide Prevention Lifeline: 988</li>
-                    <li>💬 Crisis Text Line: Text HOME to 741741</li>
+                    <li>🚨 Call emergency services (112 in Nigeria)</li>
+                    <li>💬 Local mental health support: +2348167068027</li>
+                    <li>💬 If you are in immediate danger, go to the nearest hospital or emergency clinic</li>
                   </ul>
                 </div>
               </div>

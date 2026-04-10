@@ -162,8 +162,7 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto px-4 py-12 text-center">
           <p className="mb-2">© 2024 HerHealth Dataline. All rights reserved.</p>
           <p className="text-gray-400 text-sm">
-            For medical emergencies, call 911. Crisis Text Line: Text HOME to
-            741741
+            For medical emergencies, call 112 in Nigeria. Crisis support: +2348167068027
           </p>
         </div>
       </footer>
