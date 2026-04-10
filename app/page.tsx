@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { Heart, ArrowRight } from 'lucide-react';
+import { Heart, ArrowRight, AlertTriangle } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'HerHealth Dataline - Health Guidance for Girls',
@@ -142,6 +142,38 @@ export default function HomePage() {
             Anonymized health insights help NGOs advocate for women&apos;s health
             rights and access to better healthcare.
           </p>
+        </div>
+      </div>
+
+      {/* Emergency Support Section */}
+      <div className="max-w-6xl mx-auto px-4 py-20">
+        <div className="bg-red-50 border-l-4 border-red-500 p-8 rounded-lg">
+          <div className="flex items-start gap-4">
+            <AlertTriangle className="w-8 h-8 text-red-500 flex-shrink-0 mt-1" />
+            <div>
+              <h3 className="text-2xl font-bold text-red-800 mb-4">Emergency Support in Nigeria</h3>
+              <p className="text-red-700 mb-6">
+                If you&apos;re experiencing a medical emergency or crisis situation, please contact emergency services immediately:
+              </p>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="bg-white p-6 rounded-lg shadow-sm">
+                  <h4 className="font-bold text-gray-800 mb-2">Medical Emergency</h4>
+                  <p className="text-gray-600 mb-2">Call emergency services:</p>
+                  <p className="text-2xl font-bold text-red-600">112</p>
+                  <p className="text-sm text-gray-500 mt-2">Available nationwide for medical emergencies</p>
+                </div>
+                <div className="bg-white p-6 rounded-lg shadow-sm">
+                  <h4 className="font-bold text-gray-800 mb-2">Crisis Support</h4>
+                  <p className="text-gray-600 mb-2">Women&apos;s health crisis hotline:</p>
+                  <p className="text-2xl font-bold text-red-600">+234 816 706 8027</p>
+                  <p className="text-sm text-gray-500 mt-2">24/7 support for women&apos;s health concerns</p>
+                </div>
+              </div>
+              <p className="text-red-700 mt-6 text-sm">
+                <strong>Remember:</strong> HerHealth AI provides general health information and is not a substitute for professional medical advice, diagnosis, or treatment.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
