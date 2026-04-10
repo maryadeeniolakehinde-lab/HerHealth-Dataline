@@ -9,7 +9,7 @@ interface AdminLoginProps {
 }
 
 export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess }) => {
-  const [step, setStep] = useState<'email' | 'password-setup'>('email');
+  const [step, setStep] = useState<'email' | 'password' | 'password-setup'>('email');
   const [email, setEmail] = useState('herhealthdataline@gmail.com');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -37,10 +37,48 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess }) => {
         return;
       }
 
-      setAdminToken(data.token);
-      setStep('password-setup');
+      if (data.requiresPasswordSetup) {
+        setAdminToken(data.token);
+        setStep('password-setup');
+      } else {
+        setStep('password');
+      }
     } catch (err) {
       setError('Unable to verify email. Please try again.');
+      console.error('Admin login error:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handlePasswordLogin = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError('');
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+      if (!response.ok || data.error) {
+        setError(data.error || 'Invalid password');
+        return;
+      }
+
+      setAdminSession(email, data.token);
+      if (onLoginSuccess) {
+        onLoginSuccess();
+      } else {
+        window.location.href = '/admin';
+      }
+    } catch (err) {
+      setError('Login failed. Please try again.');
       console.error('Admin login error:', err);
     } finally {
       setIsLoading(false);
@@ -144,6 +182,61 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess }) => {
               >
                 {isLoading ? 'Verifying...' : 'Continue'}
               </button>
+            </form>
+          </>
+        ) : step === 'password' ? (
+          <>
+            <h1 className="text-2xl font-bold text-gray-900 text-center mb-3">
+              Welcome Back
+            </h1>
+            <p className="text-center text-gray-500 mb-6">
+              Enter your password to continue.
+            </p>
+
+            <form className="space-y-5" onSubmit={handlePasswordLogin}>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="password">
+                  Password
+                </label>
+                <div className="relative rounded-xl border border-gray-200 focus-within:border-pink-500 focus-within:ring-2 focus-within:ring-pink-100">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
+                    <Lock className="w-4 h-4" />
+                  </div>
+                  <input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full rounded-xl border-none bg-transparent py-3 pl-11 pr-4 text-gray-900 outline-none"
+                    placeholder="Enter your password"
+                    autoFocus
+                  />
+                </div>
+              </div>
+
+              {error ? (
+                <div className="rounded-xl bg-red-50 border border-red-200 p-4 text-sm text-red-700 flex items-start gap-2">
+                  <AlertCircle className="w-5 h-5 shrink-0" />
+                  <p>{error}</p>
+                </div>
+              ) : null}
+
+              <div className="flex flex-col gap-3">
+                <button
+                  type="submit"
+                  disabled={isLoading || !password}
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-pink-600 to-purple-600 px-5 py-3 text-white font-semibold transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isLoading ? 'Logging in...' : 'Log In'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStep('email')}
+                  className="w-full py-2 text-sm text-gray-500 hover:text-gray-700 transition"
+                >
+                  Use a different email
+                </button>
+              </div>
             </form>
           </>
         ) : (

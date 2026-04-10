@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceRoleClient } from '@/lib/supabase.server';
+import crypto from 'crypto';
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,7 +23,6 @@ export async function POST(request: NextRequest) {
     const supabase = createServiceRoleClient();
 
     // Hash password using Node.js crypto
-    const crypto = require('crypto');
     const salt = crypto.randomBytes(16).toString('hex');
     const hash = crypto
       .pbkdf2Sync(password, salt, 1000, 64, 'sha512')

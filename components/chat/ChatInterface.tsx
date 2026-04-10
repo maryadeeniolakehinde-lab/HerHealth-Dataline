@@ -78,9 +78,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       timestamp: new Date().toISOString(),
     };
 
-    // Save user message to DB
-    await saveChatMessage(userId, input, 'user');
-
     setMessages((prev) => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
@@ -122,14 +119,16 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         assistantMessage.content = data.emergency_message;
       }
 
-      // Save assistant response to DB
-      await saveChatMessage(
-        userId,
-        assistantMessage.content,
-        data.routed_to === 'consultant' ? 'consultant' : 'ai',
-        data.consultant_id,
-        data.is_emergency
-      );
+      // Save assistant response to DB ONLY if it's not from AI (Edge function handles AI saves)
+      if (data.routed_to !== 'ai') {
+        await saveChatMessage(
+          userId,
+          assistantMessage.content,
+          data.routed_to === 'consultant' ? 'consultant' : 'ai',
+          data.consultant_id,
+          data.is_emergency
+        );
+      }
 
       setMessages((prev) => [...prev, assistantMessage]);
 
