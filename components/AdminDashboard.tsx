@@ -95,11 +95,11 @@ export const AdminDashboard: React.FC = () => {
 
     // Mock state data
     setStateData([
-      { state: 'California', users: 89 },
-      { state: 'Texas', users: 67 },
-      { state: 'New York', users: 54 },
-      { state: 'Florida', users: 48 },
-      { state: 'Illinois', users: 42 },
+      { state: 'Lagos', users: 89 },
+      { state: 'Rivers', users: 67 },
+      { state: 'Abuja', users: 54 },
+      { state: 'Kano', users: 48 },
+      { state: 'Ogun', users: 42 },
       { state: 'Others', users: 190 },
     ]);
 

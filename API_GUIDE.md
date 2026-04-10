@@ -15,7 +15,7 @@ Request:
 ```json
 {
   "ageRange": "16-18",
-  "state": "California"
+  "state": "Lagos"
 }
 ```
 
@@ -44,7 +44,7 @@ Response:
 {
   "user_id": "HHD-A7F9K2",
   "age_range": "16-18",
-  "state": "California",
+  "state": "Lagos",
   "created_at": "2024-01-15T10:30:00Z",
   "last_login": "2024-01-16T14:20:00Z"
 }
@@ -63,7 +63,7 @@ Request:
   "user_id": "HHD-A7F9K2",
   "message": "What should I do about period pain?",
   "age_range": "16-18",
-  "state": "California",
+  "state": "Lagos",
   "chat_history": [
     {
       "role": "user",
@@ -184,7 +184,7 @@ const api = new HerHealthAPI({
 // Create user
 const user = await api.auth.createUser({
   ageRange: '16-18',
-  state: 'California',
+  state: 'Lagos',
 });
 
 // Send message
@@ -205,7 +205,7 @@ client = HerHealthClient(api_key='your_api_key')
 # Create user
 user = client.auth.create_user(
     age_range='16-18',
-    state='California'
+    state='Lagos'
 )
 
 # Send message

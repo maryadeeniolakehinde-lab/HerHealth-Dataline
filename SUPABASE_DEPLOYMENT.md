@@ -97,11 +97,7 @@ const response = await fetch('https://potccczvznoyrlbknlaq.functions.supabase.co
     user_id: 'HHD-TEST123',
     message: 'What should I eat to stay healthy?',
     age_range: '16-18',
-    state: 'California',
-  }),
-});
-
-const result = await response.json();
+      state: 'Lagos',
 console.log(result);
 ```
 
@@ -131,11 +127,7 @@ const response = await fetch('https://potccczvznoyrlbknlaq.functions.supabase.co
     user_id: 'HHD-TEST123',
     message: 'I am having thoughts of suicide',
     age_range: '16-18',
-    state: 'California',
-  }),
-});
-
-const result = await response.json();
+      state: 'Lagos',
 console.log(result);
 ```
 
