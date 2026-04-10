@@ -42,9 +42,11 @@ export const AnonymousAuth: React.FC<AnonymousAuthProps> = ({
         body: JSON.stringify({ ageRange, state }),
       });
 
-      if (!response.ok) throw new Error('Failed to create user');
-
       const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create user');
+      }
+
       setUserId(data.user_id);
       if (typeof window !== 'undefined') {
         localStorage.setItem(
@@ -55,7 +57,8 @@ export const AnonymousAuth: React.FC<AnonymousAuthProps> = ({
       setStep('created');
     } catch (error) {
       console.error('Error:', error);
-      alert('Failed to create account. Please try again.');
+      const message = error instanceof Error ? error.message : 'Failed to create account. Please try again.';
+      alert(message);
     } finally {
       setIsLoading(false);
     }

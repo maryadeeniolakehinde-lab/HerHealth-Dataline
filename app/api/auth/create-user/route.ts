@@ -21,17 +21,15 @@ export async function POST(request: NextRequest) {
 
     const user = await createAnonymousUser(ageRange, state);
     if (!user) {
-      return NextResponse.json(
-        { error: 'Failed to create user' },
-        { status: 500 }
-      );
+      throw new Error('Failed to create user');
     }
 
     return NextResponse.json({ user_id: user.user_id });
   } catch (error) {
     console.error('Auth error:', error);
+    const message = error instanceof Error ? error.message : 'Internal server error';
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: message },
       { status: 500 }
     );
   }

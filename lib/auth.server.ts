@@ -51,13 +51,16 @@ export const createAnonymousUser = async (
 
     if (error) {
       console.error('Error creating anonymous user:', error);
-      return null;
+      throw new Error(error.message || 'Supabase insert failed');
     }
 
     return data as AnonymousUser;
   } catch (error) {
     console.error('Exception creating anonymous user:', error);
-    return null;
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error('Unknown error creating anonymous user');
   }
 };
 
