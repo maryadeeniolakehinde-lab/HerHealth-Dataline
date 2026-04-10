@@ -42,6 +42,11 @@ export default function DashboardPage() {
           } else {
             setStage('disclaimer');
           }
+        } else {
+          // Invalid session, clear it
+          localStorage.removeItem('herhealth_session');
+          setUser(null);
+          setStage('auth');
         }
       }
       setIsLoading(false);
