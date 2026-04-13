@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createServiceRoleClient } from '@/lib/supabase.server';
 import crypto from 'crypto';
 
@@ -6,13 +6,13 @@ import crypto from 'crypto';
  * Handle PATCH request for updating a consultant
  */
 export async function PATCH(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = createServiceRoleClient();
     const body = await req.json();
-    const { id } = params;
+    const { id } = await params;
 
     // Handle password update separately if provided
     if (body.password) {
@@ -48,12 +48,12 @@ export async function PATCH(
  * Handle DELETE request for removing a consultant
  */
 export async function DELETE(
-  _req: Request,
-  { params }: { params: { id: string } }
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = createServiceRoleClient();
-    const { id } = params;
+    const { id } = await params;
 
     const { error } = await supabase
       .from('consultants')

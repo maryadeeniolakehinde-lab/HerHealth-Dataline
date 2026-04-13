@@ -173,7 +173,7 @@ export const KnowledgeHub: React.FC<KnowledgeHubProps> = ({ userAgeRange: initia
                   <div className="card h-full flex flex-col p-0 overflow-hidden hover:-translate-y-2 border-slate-100">
                     <div className="h-56 relative overflow-hidden">
                       <img 
-                        src={article.image} 
+                        src={article.image_url} 
                         alt={article.title}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />

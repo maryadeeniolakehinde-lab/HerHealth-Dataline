@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import {
   BarChart,
   Bar,
@@ -455,6 +456,23 @@ export const AdminDashboard: React.FC = () => {
                 </ResponsiveContainer>
               </div>
             </div>
+            
+            {/* Privacy & Data Use */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mt-8">
+              <h3 className="font-bold text-blue-900 mb-2">
+                🔒 Data Privacy & Advocacy
+              </h3>
+              <p className="text-sm text-blue-900 mb-3">
+                All data displayed is completely anonymized and aggregated:
+              </p>
+              <ul className="text-sm text-blue-900 space-y-1 list-disc list-inside">
+                <li>No individual user identifiers are displayed</li>
+                <li>Age ranges and states are shown only as aggregate statistics</li>
+                <li>All analytics are anonymized for NGO advocacy purposes</li>
+                <li>Individual chat details are not accessible in this dashboard</li>
+                <li>Data helps inform policy and health initiatives</li>
+              </ul>
+            </div>
           </div>
         ) : activeTab === 'consultants' ? (
           <div className="space-y-6 animate-fade-in">
@@ -855,27 +873,6 @@ export const AdminDashboard: React.FC = () => {
           </div>
         </div>
       )}
-    </div>
-  );
-};
-
-        {/* Privacy & Data Use */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mt-8">
-          <h3 className="font-bold text-blue-900 mb-2">
-            🔒 Data Privacy & Advocacy
-          </h3>
-          <p className="text-sm text-blue-900 mb-3">
-            All data displayed is completely anonymized and aggregated:
-          </p>
-          <ul className="text-sm text-blue-900 space-y-1 list-disc list-inside">
-            <li>No individual user identifiers are displayed</li>
-            <li>Age ranges and states are shown only as aggregate statistics</li>
-            <li>All analytics are anonymized for NGO advocacy purposes</li>
-            <li>Individual chat details are not accessible in this dashboard</li>
-            <li>Data helps inform policy and health initiatives</li>
-          </ul>
-        </div>
-      </div>
     </div>
   );
 };

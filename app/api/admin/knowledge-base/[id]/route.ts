@@ -1,17 +1,17 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createServiceRoleClient } from '@/lib/supabase.server';
 
 /**
  * Handle PATCH request for updating an article
  */
 export async function PATCH(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = createServiceRoleClient();
     const body = await req.json();
-    const { id } = params;
+    const { id } = await params;
 
     const { data, error } = await supabase
       .from('knowledge_articles')
@@ -37,12 +37,12 @@ export async function PATCH(
  * Handle DELETE request for removing an article
  */
 export async function DELETE(
-  _req: Request,
-  { params }: { params: { id: string } }
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = createServiceRoleClient();
-    const { id } = params;
+    const { id } = await params;
 
     const { error } = await supabase
       .from('knowledge_articles')
